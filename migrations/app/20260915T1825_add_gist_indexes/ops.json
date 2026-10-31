@@ -1,0 +1,125 @@
+[
+  {
+    "id": "table.spatialIndexMigration",
+    "label": "Create table \"spatialIndexMigration\"",
+    "summary": "Creates table \"spatialIndexMigration\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "spatialIndexMigration"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"spatialIndexMigration\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"spatialIndexMigration\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"spatialIndexMigration\"",
+        "sql": "CREATE TABLE \"public\".\"spatialIndexMigration\" (\n  \"id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"spatialIndexMigration\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"spatialIndexMigration\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.disasterArea.disasterArea_area_gist_idx",
+    "label": "Create index \"disasterArea_area_gist_idx\" on \"disasterArea\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "disasterArea_area_gist_idx"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create GiST index for area",
+        "sql": "CREATE INDEX \"disasterArea_area_gist_idx\" ON \"public\".\"disasterArea\" USING GIST (\"area\");"
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "index.location.location_point_gist_idx",
+    "label": "Create index \"location_point_gist_idx\" on \"location\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "location_point_gist_idx"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create GiST index for point",
+        "sql": "CREATE INDEX \"location_point_gist_idx\" ON \"public\".\"location\" USING GIST (\"point\");"
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "index.rescueRequest.rescueRequest_location_gist_idx",
+    "label": "Create index \"rescueRequest_location_gist_idx\" on \"rescueRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "rescueRequest_location_gist_idx"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create GiST index for location",
+        "sql": "CREATE INDEX \"rescueRequest_location_gist_idx\" ON \"public\".\"rescueRequest\" USING GIST (\"location\");"
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "index.sOSEvent.sOSEvent_location_gist_idx",
+    "label": "Create index \"sOSEvent_location_gist_idx\" on \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "sOSEvent_location_gist_idx"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create GiST index for location",
+        "sql": "CREATE INDEX \"sOSEvent_location_gist_idx\" ON \"public\".\"sOSEvent\" USING GIST (\"location\");"
+      }
+    ],
+    "postcheck": []
+  }
+]

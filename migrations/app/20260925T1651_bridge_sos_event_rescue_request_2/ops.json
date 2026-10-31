@@ -1,0 +1,128 @@
+[
+  {
+    "id": "column.public.rescueRequest.sosEventId",
+    "label": "Add column \"sosEventId\" to \"rescueRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "sosEventId",
+        "table": "rescueRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"sosEventId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "rescueRequest",
+          "sosEventId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"sosEventId\"",
+        "sql": "ALTER TABLE \"public\".\"rescueRequest\" ADD COLUMN \"sosEventId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"sosEventId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "rescueRequest",
+          "sosEventId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.rescueRequest.rescueRequest_sosEventId_key",
+    "label": "Add unique constraint on \"rescueRequest\" (sosEventId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "rescueRequest_sosEventId_key",
+        "table": "rescueRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"rescueRequest_sosEventId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueRequest_sosEventId_key",
+          "public",
+          "\"public\".\"rescueRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"rescueRequest_sosEventId_key\"",
+        "sql": "ALTER TABLE \"public\".\"rescueRequest\" ADD CONSTRAINT \"rescueRequest_sosEventId_key\" UNIQUE (\"sosEventId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"rescueRequest_sosEventId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueRequest_sosEventId_key",
+          "public",
+          "\"public\".\"rescueRequest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.rescueRequest.rescueRequest_sosEventId_fkey",
+    "label": "Add foreign key \"rescueRequest_sosEventId_fkey\" on \"rescueRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "rescueRequest_sosEventId_fkey",
+        "table": "rescueRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"rescueRequest_sosEventId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueRequest_sosEventId_fkey",
+          "public",
+          "\"public\".\"rescueRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"rescueRequest_sosEventId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"rescueRequest\"\nADD CONSTRAINT \"rescueRequest_sosEventId_fkey\"\nFOREIGN KEY (\"sosEventId\")\nREFERENCES \"public\".\"sOSEvent\" (\"id\")\nON DELETE SET NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"rescueRequest_sosEventId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueRequest_sosEventId_fkey",
+          "public",
+          "\"public\".\"rescueRequest\""
+        ]
+      }
+    ]
+  }
+]

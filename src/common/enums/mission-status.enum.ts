@@ -1,0 +1,8 @@
+export enum MissionStatus {
+  ASSIGNED = 'ASSIGNED',
+  IN_ROUTE = 'IN_ROUTE',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  FAILED = 'FAILED',
+}

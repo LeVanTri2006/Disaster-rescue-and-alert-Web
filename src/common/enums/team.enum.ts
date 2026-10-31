@@ -1,0 +1,13 @@
+export enum TeamStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  ON_MISSION = 'ON_MISSION',
+}
+
+export enum TeamMemberRole {
+  LEADER = 'LEADER',
+  COORDINATOR = 'COORDINATOR',
+  SPECIALIST = 'SPECIALIST',
+  MEMBER = 'MEMBER',
+  VOLUNTEER = 'VOLUNTEER',
+}

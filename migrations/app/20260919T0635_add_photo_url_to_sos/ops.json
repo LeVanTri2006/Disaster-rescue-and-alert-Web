@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.sOSEvent.photoUrl",
+    "label": "Add column \"photoUrl\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "photoUrl",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"photoUrl\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "photoUrl"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"photoUrl\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"photoUrl\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"photoUrl\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "photoUrl"
+        ]
+      }
+    ]
+  }
+]

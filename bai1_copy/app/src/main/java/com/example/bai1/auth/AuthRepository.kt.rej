@@ -1,0 +1,21 @@
+--- ./bai1_copy/app/src/main/java/com/example/bai1/auth/AuthRepository.kt
++++ ./bai1_copy/app/src/main/java/com/example/bai1/auth/AuthRepository.kt
+@@ -19,6 +19,7 @@
+     suspend fun login(identifier: String, password: String): Result<AuthTokens>
+     suspend fun register(request: RegisterRequest): Result<AuthTokens>
+     suspend fun forgotPassword(identifier: String): Result<Unit>
++    suspend fun verifyOtp(identifier: String, otp: String): Result<Unit>
+     suspend fun resetPassword(identifier: String, otp: String, newPassword: String): Result<Unit>
+     suspend fun resetPasswordFirebase(firebaseIdToken: String, newPassword: String): Result<Unit>
+     fun logout()
+@@ -52,6 +53,10 @@
+         return apiResultToResult { apiClient.forgotPassword(identifier) }
+     }
+ 
++    override suspend fun verifyOtp(identifier: String, otp: String): Result<Unit> {
++        return apiResultToResult { apiClient.verifyOtp(identifier, otp) }
++    }
++
+     override suspend fun resetPassword(identifier: String, otp: String, newPassword: String): Result<Unit> {
+         return apiResultToResult { apiClient.resetPassword(identifier, otp, newPassword) }
+     }

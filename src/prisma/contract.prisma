@@ -1,0 +1,370 @@
+// use prisma-8
+
+enum UserRole {
+  ADMIN
+  MODERATOR
+  USER
+  RESCUER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+  PENDING
+}
+
+enum ProfileVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DisasterType {
+  STORM
+  FLOOD
+  EARTHQUAKE
+  LANDSLIDE
+  TSUNAMI
+  DROUGHT
+  WILDFIRE
+  OTHER
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum DisasterStatus {
+  ACTIVE
+  RESOLVED
+  CLOSED
+}
+
+enum RescueRequestStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+}
+
+enum MissionStatus {
+  ASSIGNED
+  IN_ROUTE
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum TeamStatus {
+  ACTIVE
+  INACTIVE
+  ON_MISSION
+}
+
+enum TeamMemberRole {
+  LEADER
+  COORDINATOR
+  SPECIALIST
+  MEMBER
+  VOLUNTEER
+}
+
+enum NotificationType {
+  WARNING
+  SOS
+  MISSION_UPDATE
+  SYSTEM
+}
+
+enum ConversationType {
+  DIRECT
+  MISSION
+  SOS_GROUP
+}
+
+enum MessageType {
+  TEXT
+  LOCATION
+  IMAGE
+  SYSTEM
+}
+
+enum SOSStatus {
+  ACTIVE
+  RESOLVED
+  FALSE_ALARM
+}
+
+model User {
+  id        String   @id @default(uuid())
+  phone     String?  @unique
+  email     String?  @unique
+  firebaseUid String? @unique
+  password  String?
+  fullName  String
+  avatar    String?
+  role      UserRole @default(USER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  resetPasswordOtp String?
+  resetPasswordExpiresAt DateTime?
+
+  rescueProfile              RescueProfile?
+  rescueRequests             RescueRequest[]
+  sosEvents                  SOSEvent[]
+  notifications              Notification[]
+  locations                  Location[]
+  teamMemberships            TeamMember[]
+  messages                   Message[]
+  ledTeams                   RescueTeam[]            @relation("TeamLeader")
+  individualMissions         RescueMission[]         @relation("IndividualMission")
+  conversationParticipations ConversationParticipant[]
+}
+
+model RescueProfile {
+  id                 String                    @id @default(uuid())
+  userId             String                    @unique
+  user               User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  identification     String?
+  skills             String[]
+  vehicle            String?
+  availability       Boolean                   @default(true)
+  verificationStatus ProfileVerificationStatus @default(PENDING)
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @default(now())
+}
+
+model Disaster {
+  id          String         @id @default(uuid())
+  type        DisasterType
+  title       String
+  description String?
+  severity    Severity
+  status      DisasterStatus @default(ACTIVE)
+  startTime   DateTime?
+  endTime     DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now())
+
+  warnings       Warning[]
+  disasterAreas  DisasterArea[]
+
+  @@index([status])
+}
+
+model Warning {
+  id         String   @id @default(uuid())
+  disasterId String
+  disaster   Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  title      String
+  message    String
+  severity   Severity
+  issuedAt   DateTime @default(now())
+  expiresAt  DateTime?
+
+  @@index([issuedAt, expiresAt])
+}
+
+model DisasterArea {
+  id         String   @id @default(uuid())
+  disasterId String
+  disaster   Disaster @relation(fields: [disasterId], references: [id], onDelete: Cascade)
+  severity   Severity
+  population Int?
+  
+  /// Spatial GiST index added via migration
+  area       postgis.Geometry(4326)
+}
+
+model RescueRequest {
+  id             String              @id @default(uuid())
+  requesterId    String
+  requester      User                @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+  
+  sosEventId     String?             @unique
+  sosEvent       SOSEvent?           @relation(fields: [sosEventId], references: [id], onDelete: SetNull)
+  
+  location       postgis.Geometry(4326)
+  
+  peopleCount    Int                 @default(1)
+  urgency        Severity
+  description    String?
+  status         RescueRequestStatus @default(PENDING)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @default(now())
+
+  missions       RescueMission[]
+
+  @@index([status])
+}
+
+model RescueMission {
+  id          String          @id @default(uuid())
+  requestId   String
+  request     RescueRequest   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  
+  teamId      String?
+  team        RescueTeam?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  rescuerId   String?
+  rescuer     User?           @relation("IndividualMission", fields: [rescuerId], references: [id], onDelete: SetNull)
+
+  status      MissionStatus   @default(ASSIGNED)
+  acceptedAt  DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  notes       String?
+
+  conversations Conversation[]
+
+  @@index([status])
+  @@index([teamId])
+  @@index([rescuerId])
+}
+
+model RescueTeam {
+  id        String       @id @default(uuid())
+  name      String
+  status    TeamStatus   @default(ACTIVE)
+  
+  leaderId  String
+  leader    User         @relation("TeamLeader", fields: [leaderId], references: [id], onDelete: Restrict)
+  
+  members   TeamMember[]
+  missions  RescueMission[]
+
+  @@index([leaderId])
+}
+
+model TeamMember {
+  id        String         @id @default(uuid())
+  teamId    String
+  team      RescueTeam     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      TeamMemberRole @default(MEMBER)
+  joinedAt  DateTime       @default(now())
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model Location {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  point     postgis.Geometry(4326)
+  
+  timestamp DateTime @default(now())
+  type      String?
+
+  @@index([userId, timestamp])
+}
+
+model SOSEvent {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  location  postgis.Geometry(4326)
+  
+  emergencyType String?
+  message   String?
+  adults    Int       @default(0)
+  children  Int       @default(0)
+  elderly   Int       @default(0)
+  neededItems String[] @default([])
+  accuracyMeters Float?
+  batteryPercent Int?
+  urgency   Severity?
+  transportMode String?
+  photoUrl  String?
+  photos    SOSPhoto[]
+  status    SOSStatus @default(ACTIVE)
+  createdAt DateTime  @default(now())
+
+  conversation Conversation?
+  rescueRequest RescueRequest?
+
+  @@index([status])
+  @@index([userId, status])
+}
+
+model SOSPhoto {
+  id          String   @id @default(uuid())
+  sosEventId  String
+  sosEvent    SOSEvent @relation(fields: [sosEventId], references: [id], onDelete: Cascade)
+  objectKey   String
+  contentType String?
+  fileSize    Int?
+  createdAt   DateTime @default(now())
+}
+
+
+model Notification {
+  id          String           @id @default(uuid())
+  recipientId String
+  recipient   User             @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  title       String
+  message     String
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  @@index([recipientId, read])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt       DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Conversation {
+  id          String           @id @default(uuid())
+  type        ConversationType
+  missionId   String?
+  mission     RescueMission?   @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  sosEventId  String?          @unique
+  sosEvent    SOSEvent?        @relation(fields: [sosEventId], references: [id], onDelete: SetNull)
+  createdAt   DateTime         @default(now())
+
+  messages     Message[]
+  participants ConversationParticipant[]
+
+  @@index([missionId])
+  @@index([sosEventId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  
+  text           String?
+  mediaUrl       String?
+  point          postgis.Geometry(4326)?
+  
+  type           MessageType  @default(TEXT)
+  sentAt         DateTime     @default(now())
+  readAt         DateTime?
+
+  @@index([conversationId, sentAt])
+}
+model SpatialIndexMigration { id String @id }

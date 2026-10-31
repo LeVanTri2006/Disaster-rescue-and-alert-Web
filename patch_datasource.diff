@@ -1,0 +1,52 @@
+--- bai1_copy/app/src/main/java/com/example/bai1/sos/realtime/FirebaseSosRealtimeDataSource.kt
++++ bai1_copy/app/src/main/java/com/example/bai1/sos/realtime/FirebaseSosRealtimeDataSource.kt
+@@ -19,13 +19,6 @@
+ ) : SosRealtimeDataSource {
+     override
+     fun observeChanges(): Flow<FirebaseSosChange> = callbackFlow {
+-        val uid = auth.currentUser?.uid
+-        if (uid.isNullOrBlank()) {
+-            close()
+-            return@callbackFlow
+-        }
+-
+         val database = runCatching { databaseProvider() }.getOrElse {
+             close()
+             return@callbackFlow
+@@ -49,15 +42,28 @@
+         }
+ 
+         val operationalReference = database.getReference("sos-events")
+-        val ownerReference = database.getReference("sos-owner-events").child(uid)
+         val operationalListener = listener("sos-events")
+         val ownerListener = listener("sos-owner-events")
+-        operationalReference.addChildEventListener(operationalListener)
+-        ownerReference.addChildEventListener(ownerListener)
++        var currentUid: String? = null
+ 
++        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
++            val newUid = firebaseAuth.uid
++            if (newUid == currentUid) return@AuthStateListener
++            if (currentUid != null) {
++                database.getReference("sos-owner-events").child(currentUid!!).removeEventListener(ownerListener)
++            }
++            operationalReference.removeEventListener(operationalListener)
++            currentUid = newUid
++            if (newUid != null) {
++                database.getReference("sos-owner-events").child(newUid).addChildEventListener(ownerListener)
++                operationalReference.addChildEventListener(operationalListener)
++            }
++        }
++
++        auth.addAuthStateListener(authStateListener)
++
+         awaitClose {
++            auth.removeAuthStateListener(authStateListener)
+             operationalReference.removeEventListener(operationalListener)
+-            ownerReference.removeEventListener(ownerListener)
++            if (currentUid != null) {
++                database.getReference("sos-owner-events").child(currentUid!!).removeEventListener(ownerListener)
++            }
+         }
+     }
+ }

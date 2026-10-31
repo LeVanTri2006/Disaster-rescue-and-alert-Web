@@ -1,0 +1,710 @@
+[
+  {
+    "id": "table.spatialIndexMigration",
+    "label": "Create table \"spatialIndexMigration\"",
+    "summary": "Creates table \"spatialIndexMigration\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "spatialIndexMigration"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"spatialIndexMigration\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"spatialIndexMigration\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"spatialIndexMigration\"",
+        "sql": "CREATE TABLE \"public\".\"spatialIndexMigration\" (\n  \"id\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"spatialIndexMigration\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"spatialIndexMigration\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.accuracyMeters",
+    "label": "Add column \"accuracyMeters\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "accuracyMeters",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"accuracyMeters\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "accuracyMeters"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"accuracyMeters\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"accuracyMeters\" float8"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"accuracyMeters\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "accuracyMeters"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.adults",
+    "label": "Add column \"adults\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "adults",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"adults\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "adults"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"adults\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"adults\" int4 DEFAULT 0 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"adults\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "adults"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.batteryPercent",
+    "label": "Add column \"batteryPercent\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "batteryPercent",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"batteryPercent\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "batteryPercent"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"batteryPercent\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"batteryPercent\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"batteryPercent\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "batteryPercent"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.children",
+    "label": "Add column \"children\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "children",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"children\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "children"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"children\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"children\" int4 DEFAULT 0 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"children\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "children"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.elderly",
+    "label": "Add column \"elderly\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "elderly",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"elderly\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "elderly"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"elderly\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"elderly\" int4 DEFAULT 0 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"elderly\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "elderly"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.neededItems",
+    "label": "Add column \"neededItems\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "neededItems",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"neededItems\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "neededItems"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"neededItems\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"neededItems\" text[] DEFAULT '{}' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"neededItems\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "neededItems"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.photoUrl",
+    "label": "Add column \"photoUrl\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "photoUrl",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"photoUrl\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "photoUrl"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"photoUrl\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"photoUrl\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"photoUrl\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "photoUrl"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.transportMode",
+    "label": "Add column \"transportMode\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "transportMode",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"transportMode\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "transportMode"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"transportMode\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"transportMode\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"transportMode\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "transportMode"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.sOSEvent.urgency",
+    "label": "Add column \"urgency\" to \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "urgency",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"urgency\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "urgency"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"urgency\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD COLUMN \"urgency\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"urgency\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "sOSEvent",
+          "urgency"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.user.firebaseUid",
+    "label": "Add column \"firebaseUid\" to \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "firebaseUid",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"firebaseUid\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "firebaseUid"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"firebaseUid\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD COLUMN \"firebaseUid\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"firebaseUid\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "firebaseUid"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.user.resetPasswordExpiresAt",
+    "label": "Add column \"resetPasswordExpiresAt\" to \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "resetPasswordExpiresAt",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"resetPasswordExpiresAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "resetPasswordExpiresAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"resetPasswordExpiresAt\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD COLUMN \"resetPasswordExpiresAt\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"resetPasswordExpiresAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "resetPasswordExpiresAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.user.resetPasswordOtp",
+    "label": "Add column \"resetPasswordOtp\" to \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "resetPasswordOtp",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"resetPasswordOtp\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "resetPasswordOtp"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"resetPasswordOtp\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD COLUMN \"resetPasswordOtp\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"resetPasswordOtp\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "resetPasswordOtp"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.sOSEvent.sOSEvent_neededItems_elem_not_null_b53aad55",
+    "label": "Add check constraint \"sOSEvent_neededItems_elem_not_null_b53aad55\" on \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "sOSEvent_neededItems_elem_not_null_b53aad55",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"sOSEvent_neededItems_elem_not_null_b53aad55\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sOSEvent_neededItems_elem_not_null_b53aad55",
+          "public",
+          "\"public\".\"sOSEvent\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"sOSEvent_neededItems_elem_not_null_b53aad55\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD CONSTRAINT \"sOSEvent_neededItems_elem_not_null_b53aad55\" CHECK (array_position(\"neededItems\", NULL) IS NULL)"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"sOSEvent_neededItems_elem_not_null_b53aad55\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sOSEvent_neededItems_elem_not_null_b53aad55",
+          "public",
+          "\"public\".\"sOSEvent\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.sOSEvent.sOSEvent_urgency_check_a1ef6707",
+    "label": "Add check constraint \"sOSEvent_urgency_check_a1ef6707\" on \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "sOSEvent_urgency_check_a1ef6707",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"sOSEvent_urgency_check_a1ef6707\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sOSEvent_urgency_check_a1ef6707",
+          "public",
+          "\"public\".\"sOSEvent\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"sOSEvent_urgency_check_a1ef6707\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\" ADD CONSTRAINT \"sOSEvent_urgency_check_a1ef6707\" CHECK (\"urgency\" IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"sOSEvent_urgency_check_a1ef6707\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sOSEvent_urgency_check_a1ef6707",
+          "public",
+          "\"public\".\"sOSEvent\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.user.user_firebaseUid_key",
+    "label": "Add unique constraint on \"user\" (firebaseUid)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "user_firebaseUid_key",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"user_firebaseUid_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_firebaseUid_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"user_firebaseUid_key\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD CONSTRAINT \"user_firebaseUid_key\" UNIQUE (\"firebaseUid\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"user_firebaseUid_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_firebaseUid_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.sOSEvent.sOSEvent_userId_status_idx_e4a128ba",
+    "label": "Create index \"sOSEvent_userId_status_idx_e4a128ba\" on \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "sOSEvent_userId_status_idx_e4a128ba",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"sOSEvent_userId_status_idx_e4a128ba\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sOSEvent_userId_status_idx_e4a128ba\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"sOSEvent_userId_status_idx_e4a128ba\"",
+        "sql": "CREATE INDEX \"sOSEvent_userId_status_idx_e4a128ba\" ON \"public\".\"sOSEvent\" (\"userId\", \"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"sOSEvent_userId_status_idx_e4a128ba\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sOSEvent_userId_status_idx_e4a128ba\""
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "column.public.user.resetPasswordExpiresAt",
+    "label": "Add column \"resetPasswordExpiresAt\" to \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "resetPasswordExpiresAt",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"resetPasswordExpiresAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "resetPasswordExpiresAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"resetPasswordExpiresAt\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD COLUMN \"resetPasswordExpiresAt\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"resetPasswordExpiresAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "resetPasswordExpiresAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.user.resetPasswordOtp",
+    "label": "Add column \"resetPasswordOtp\" to \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "resetPasswordOtp",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"resetPasswordOtp\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "resetPasswordOtp"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"resetPasswordOtp\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD COLUMN \"resetPasswordOtp\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"resetPasswordOtp\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "user",
+          "resetPasswordOtp"
+        ]
+      }
+    ]
+  }
+]

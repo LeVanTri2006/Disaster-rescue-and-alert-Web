@@ -1,0 +1,97 @@
+--- /home/vantri/AndroidStudioProjects/bai1/app/src/main/java/com/example/bai1/sos/realtime/FirebaseSosRealtimeDataSource.kt	2026-09-18 20:24:02.066946964 +0700
++++ bai1_copy/app/src/main/java/com/example/bai1/sos/realtime/FirebaseSosRealtimeDataSource.kt	2026-09-18 21:09:43.217412082 +0700
+@@ -5,7 +5,6 @@
+ import com.google.firebase.database.DataSnapshot
+ import com.google.firebase.database.DatabaseError
+ import com.google.firebase.database.FirebaseDatabase
+-import android.util.Log
+ import kotlinx.coroutines.channels.awaitClose
+ import kotlinx.coroutines.flow.Flow
+ import kotlinx.coroutines.flow.callbackFlow
+@@ -20,55 +19,62 @@
+ ) : SosRealtimeDataSource {
+     override
+     fun observeChanges(): Flow<FirebaseSosChange> = callbackFlow {
+-        val uid = auth.currentUser?.uid
+-        Log.d("MAP_DEBUG", "RTDB_DEBUG_PACKAGE=com.example.bai1")
+-        val dbHost = runCatching { databaseProvider().reference.database.reference.toString() }.getOrDefault("UNKNOWN")
+-        Log.d("MAP_DEBUG", "RTDB_DEBUG_DATABASE_HOST=$dbHost")
+-        Log.d("MAP_DEBUG", "RTDB_DEBUG_PROJECT_ID=${auth.app.options.projectId}")
+-        if (uid.isNullOrBlank()) {
+-            Log.e("MAP_DEBUG", "RTDB_DEBUG_ERROR code=AUTH_NOT_READY")
+-            close()
+-            return@callbackFlow
+-        }
+-        Log.d("MAP_DEBUG", "RTDB_DEBUG_AUTH_READY")
+-        Log.d("MAP_DEBUG", "RTDB_DEBUG_UID=$uid")
++
+ 
+         val database = runCatching { databaseProvider() }.getOrElse {
+             close()
+             return@callbackFlow
+         }
+ 
+-        fun listener(type: String) = object : ChildEventListener {
++        fun listener(name: String) = object : ChildEventListener {
+             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+-                Log.d("MAP_DEBUG", "RTDB_DEBUG_CHILD_ADDED: $type - ${snapshot.key} - status=${snapshot.child("status").value}")
+                 FirebaseSosEventMapper.fromSnapshot(snapshot)?.let { trySend(it) }
+             }
+ 
+             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+-                Log.d("MAP_DEBUG", "RTDB_DEBUG_CHILD_CHANGED: $type - ${snapshot.key} - status=${snapshot.child("status").value}")
+                 FirebaseSosEventMapper.fromSnapshot(snapshot)?.let { trySend(it) }
+             }
+ 
+             override fun onChildRemoved(snapshot: DataSnapshot) {
+-                Log.d("MAP_DEBUG", "RTDB_DEBUG_CHILD_REMOVED: $type - ${snapshot.key}")
+                 snapshot.key?.let { trySend(FirebaseSosChange.Removed(it)) }
+             }
+ 
+             override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) = Unit
+-            override fun onCancelled(error: DatabaseError) { Log.e("MAP_DEBUG", "RTDB_DEBUG_ERROR code=${error.code} message=${error.message}") }
++            override fun onCancelled(error: DatabaseError) {
++                android.util.Log.e("FirebaseRealtime", "Listener $name failed: ${error.message}")
++            }
+         }
+ 
+         val operationalReference = database.getReference("sos-events")
+-        val ownerReference = database.getReference("sos-owner-events").child(uid)
+-        Log.d("MAP_DEBUG", "RTDB_DEBUG_LISTENER_START: uid=$uid")
+-        val operationalListener = listener("operational")
+-        val ownerListener = listener("owner")
+-        operationalReference.addChildEventListener(operationalListener)
+-        ownerReference.addChildEventListener(ownerListener)
++        val operationalListener = listener("sos-events")
++        val ownerListener = listener("sos-owner-events")
++        var currentUid: String? = null
++
++        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
++            val newUid = firebaseAuth.uid
++            if (newUid == currentUid) return@AuthStateListener
++
++            if (currentUid != null) {
++                database.getReference("sos-owner-events").child(currentUid!!).removeEventListener(ownerListener)
++            }
++            operationalReference.removeEventListener(operationalListener)
++            
++            currentUid = newUid
++
++            if (newUid != null) {
++                database.getReference("sos-owner-events").child(newUid).addChildEventListener(ownerListener)
++                operationalReference.addChildEventListener(operationalListener)
++            }
++        }
++
++        auth.addAuthStateListener(authStateListener)
+ 
+         awaitClose {
++            auth.removeAuthStateListener(authStateListener)
+             operationalReference.removeEventListener(operationalListener)
+-            ownerReference.removeEventListener(ownerListener)
++            if (currentUid != null) {
++                database.getReference("sos-owner-events").child(currentUid!!).removeEventListener(ownerListener)
++            }
+         }
+     }
+ }

@@ -1,0 +1,43 @@
+--- src/auth/auth.service.ts
++++ src/auth/auth.service.ts
+@@ -241,6 +241,27 @@
+     return { message: 'If your account exists, an OTP has been sent.' };
+   }
+ 
++  async verifyOtp(identifier: string, otp: string) {
++    const user = await this.usersService.findByEmail(identifier) || await this.usersService.findByPhone(identifier);
++
++    if (!user || !user.resetPasswordOtp || !user.resetPasswordExpiresAt) {
++      throw new BadRequestException('Invalid or expired OTP');
++    }
++
++    const isExpired = (globalThis as any).Temporal.Instant.compare(
++      (globalThis as any).Temporal.Now.instant(),
++      user.resetPasswordExpiresAt
++    ) > 0;
++
++    if (isExpired) {
++      throw new BadRequestException('OTP has expired');
++    }
++
++    const isValidOtp = await bcrypt.compare(otp, user.resetPasswordOtp);
++    if (!isValidOtp) {
++      throw new BadRequestException('Invalid OTP');
++    }
++    return true;
++  }
++
+   async resetPassword(resetPasswordDto: ResetPasswordDto) {
+--- src/auth/auth.controller.ts
++++ src/auth/auth.controller.ts
+@@ -53,6 +53,12 @@
+     return { success: true, data: result };
+   }
+ 
++  @Post('verify-otp')
++  async verifyOtp(@Body() body: { identifier: string; otp: string }) {
++    const result = await this.authService.verifyOtp(body.identifier, body.otp);
++    return { success: true, data: result };
++  }
++
+   @Post('reset-password')

@@ -1,0 +1,62 @@
+package com.example.bai1.auth
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+
+class AuthViewModel(
+    private val repository: AuthRepository
+) : ViewModel() {
+    val state = repository.state
+
+    init {
+        restoreSession()
+    }
+
+    fun login(identifier: String, password: String) {
+        viewModelScope.launch { repository.login(identifier, password) }
+    }
+
+    fun logout() {
+        viewModelScope.launch { repository.logout() }
+    }
+
+    private fun restoreSession() {
+        viewModelScope.launch { repository.restoreSession() }
+    }
+
+    fun forgotPassword(identifier: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch { 
+            onResult(repository.forgotPassword(identifier))
+        }
+    }
+
+    fun verifyOtp(identifier: String, otp: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.verifyOtp(identifier, otp))
+        }
+    }
+
+    fun resetPassword(identifier: String, otp: String, newPassword: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.resetPassword(identifier, otp, newPassword))
+        }
+    }
+
+    fun resetPasswordFirebase(firebaseIdToken: String, newPassword: String, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch {
+            onResult(repository.resetPasswordFirebase(firebaseIdToken, newPassword))
+        }
+    }
+
+    companion object {
+        fun factory(repository: AuthRepository): ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AuthViewModel(repository) as T
+                }
+            }
+    }
+}

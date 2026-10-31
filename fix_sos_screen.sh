@@ -1,0 +1,1 @@
+sed -i 's/detectTapGestures(/awaitEachGesture { awaitFirstDown(); isPressing = true; do { val event = awaitPointerEvent() } while (event.changes.any { it.pressed }); isPressing = false }/g' /home/vantri/AndroidStudioProjects/bai1/app/src/main/java/com/example/bai1/presentation/sos/SOSScreen.kt

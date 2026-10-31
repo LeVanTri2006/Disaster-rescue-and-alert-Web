@@ -1,0 +1,18 @@
+--- ./bai1_copy/app/src/main/java/com/example/bai1/auth/network/AuthApiClient.kt
++++ ./bai1_copy/app/src/main/java/com/example/bai1/auth/network/AuthApiClient.kt
+@@ -148,6 +148,15 @@
+             parser = {}
+         )
+ 
++    override suspend fun verifyOtp(identifier: String, otp: String): AuthApiResult<Unit> =
++        executeJson(
++            method = "POST",
++            path = "/auth/verify-otp",
++            body = "{" +
++                "\"identifier\":\"${escapeJson(identifier)}\"," +
++                "\"otp\":\"${escapeJson(otp)}\"" +
++                "}",
++            parser = {}
++        )
++
+     override suspend fun resetPasswordFirebase(firebaseIdToken: String, newPassword: String): AuthApiResult<Unit> =

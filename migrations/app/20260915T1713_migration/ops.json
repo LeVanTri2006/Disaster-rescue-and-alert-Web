@@ -1,0 +1,2688 @@
+[
+  {
+    "id": "dropTable.systemHealth",
+    "label": "Drop table \"systemHealth\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "systemHealth"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"systemHealth\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"systemHealth\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop table \"systemHealth\"",
+        "sql": "DROP TABLE \"public\".\"systemHealth\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"systemHealth\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"systemHealth\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.conversation",
+    "label": "Create table \"conversation\"",
+    "summary": "Creates table \"conversation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "conversation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"conversation\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversation\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"conversation\"",
+        "sql": "CREATE TABLE \"public\".\"conversation\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"missionId\" text,\n  \"sosEventId\" text,\n  \"type\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"conversation_type_check_7cad376a\" CHECK (\"type\" IN ('DIRECT', 'MISSION', 'SOS_GROUP'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"conversation\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversation\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.conversationParticipant",
+    "label": "Create table \"conversationParticipant\"",
+    "summary": "Creates table \"conversationParticipant\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "conversationParticipant"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"conversationParticipant\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversationParticipant\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"conversationParticipant\"",
+        "sql": "CREATE TABLE \"public\".\"conversationParticipant\" (\n  \"conversationId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"joinedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"conversationParticipant\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversationParticipant\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.disaster",
+    "label": "Create table \"disaster\"",
+    "summary": "Creates table \"disaster\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "disaster"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"disaster\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"disaster\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"disaster\"",
+        "sql": "CREATE TABLE \"public\".\"disaster\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"endTime\" timestamptz,\n  \"id\" text NOT NULL,\n  \"severity\" text NOT NULL,\n  \"startTime\" timestamptz,\n  \"status\" text DEFAULT 'ACTIVE' NOT NULL,\n  \"title\" text NOT NULL,\n  \"type\" text NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"disaster_severity_check_5e5a5e80\" CHECK (\"severity\" IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')),\n  CONSTRAINT \"disaster_status_check_1474f751\" CHECK (\"status\" IN ('ACTIVE', 'RESOLVED', 'CLOSED')),\n  CONSTRAINT \"disaster_type_check_487a6659\" CHECK (\"type\" IN ('STORM', 'FLOOD', 'EARTHQUAKE', 'LANDSLIDE', 'TSUNAMI', 'DROUGHT', 'WILDFIRE', 'OTHER'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"disaster\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"disaster\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.disasterArea",
+    "label": "Create table \"disasterArea\"",
+    "summary": "Creates table \"disasterArea\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "disasterArea"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"disasterArea\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"disasterArea\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"disasterArea\"",
+        "sql": "CREATE TABLE \"public\".\"disasterArea\" (\n  \"area\" geometry(Geometry,4326) NOT NULL,\n  \"disasterId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"population\" int4,\n  \"severity\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"disasterArea_severity_check_5e5a5e80\" CHECK (\"severity\" IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"disasterArea\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"disasterArea\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.location",
+    "label": "Create table \"location\"",
+    "summary": "Creates table \"location\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "location"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"location\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"location\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"location\"",
+        "sql": "CREATE TABLE \"public\".\"location\" (\n  \"id\" text NOT NULL,\n  \"point\" geometry(Geometry,4326) NOT NULL,\n  \"timestamp\" timestamptz DEFAULT (now()) NOT NULL,\n  \"type\" text,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"location\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"location\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.message",
+    "label": "Create table \"message\"",
+    "summary": "Creates table \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"message\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"message\"",
+        "sql": "CREATE TABLE \"public\".\"message\" (\n  \"conversationId\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"mediaUrl\" text,\n  \"point\" geometry(Geometry,4326),\n  \"readAt\" timestamptz,\n  \"senderId\" text NOT NULL,\n  \"sentAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"text\" text,\n  \"type\" text DEFAULT 'TEXT' NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"message_type_check_4f6552e3\" CHECK (\"type\" IN ('TEXT', 'LOCATION', 'IMAGE', 'SYSTEM'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"message\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.notification",
+    "label": "Create table \"notification\"",
+    "summary": "Creates table \"notification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "notification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"notification\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"notification\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"notification\"",
+        "sql": "CREATE TABLE \"public\".\"notification\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"message\" text NOT NULL,\n  \"read\" bool DEFAULT false NOT NULL,\n  \"recipientId\" text NOT NULL,\n  \"title\" text NOT NULL,\n  \"type\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"notification_type_check_deef6564\" CHECK (\"type\" IN ('WARNING', 'SOS', 'MISSION_UPDATE', 'SYSTEM'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"notification\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"notification\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.rescueMission",
+    "label": "Create table \"rescueMission\"",
+    "summary": "Creates table \"rescueMission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "rescueMission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"rescueMission\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"rescueMission\"",
+        "sql": "CREATE TABLE \"public\".\"rescueMission\" (\n  \"acceptedAt\" timestamptz,\n  \"completedAt\" timestamptz,\n  \"id\" text NOT NULL,\n  \"notes\" text,\n  \"requestId\" text NOT NULL,\n  \"rescuerId\" text,\n  \"startedAt\" timestamptz,\n  \"status\" text DEFAULT 'ASSIGNED' NOT NULL,\n  \"teamId\" text,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"rescueMission_status_check_892ef73b\" CHECK (\"status\" IN ('ASSIGNED', 'IN_ROUTE', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'FAILED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"rescueMission\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.rescueProfile",
+    "label": "Create table \"rescueProfile\"",
+    "summary": "Creates table \"rescueProfile\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "rescueProfile"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"rescueProfile\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueProfile\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"rescueProfile\"",
+        "sql": "CREATE TABLE \"public\".\"rescueProfile\" (\n  \"availability\" bool DEFAULT true NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"identification\" text,\n  \"skills\" text[] NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"userId\" text NOT NULL,\n  \"vehicle\" text,\n  \"verificationStatus\" text DEFAULT 'PENDING' NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"rescueProfile_skills_elem_not_null_79c19a4f\" CHECK (array_position(\"skills\", NULL) IS NULL),\n  CONSTRAINT \"rescueProfile_verificationStatus_check_5d9c5935\" CHECK (\"verificationStatus\" IN ('PENDING', 'APPROVED', 'REJECTED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"rescueProfile\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueProfile\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.rescueRequest",
+    "label": "Create table \"rescueRequest\"",
+    "summary": "Creates table \"rescueRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "rescueRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"rescueRequest\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"rescueRequest\"",
+        "sql": "CREATE TABLE \"public\".\"rescueRequest\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"id\" text NOT NULL,\n  \"location\" geometry(Geometry,4326) NOT NULL,\n  \"peopleCount\" int4 DEFAULT 1 NOT NULL,\n  \"requesterId\" text NOT NULL,\n  \"status\" text DEFAULT 'PENDING' NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"urgency\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"rescueRequest_status_check_7c3ed2a8\" CHECK (\"status\" IN ('PENDING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CANCELLED')),\n  CONSTRAINT \"rescueRequest_urgency_check_a1ef6707\" CHECK (\"urgency\" IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"rescueRequest\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueRequest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.rescueTeam",
+    "label": "Create table \"rescueTeam\"",
+    "summary": "Creates table \"rescueTeam\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "rescueTeam"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"rescueTeam\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueTeam\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"rescueTeam\"",
+        "sql": "CREATE TABLE \"public\".\"rescueTeam\" (\n  \"id\" text NOT NULL,\n  \"leaderId\" text NOT NULL,\n  \"name\" text NOT NULL,\n  \"status\" text DEFAULT 'ACTIVE' NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"rescueTeam_status_check_b8ad1bc9\" CHECK (\"status\" IN ('ACTIVE', 'INACTIVE', 'ON_MISSION'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"rescueTeam\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueTeam\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.sOSEvent",
+    "label": "Create table \"sOSEvent\"",
+    "summary": "Creates table \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"sOSEvent\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sOSEvent\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"sOSEvent\"",
+        "sql": "CREATE TABLE \"public\".\"sOSEvent\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"emergencyType\" text,\n  \"id\" text NOT NULL,\n  \"location\" geometry(Geometry,4326) NOT NULL,\n  \"message\" text,\n  \"status\" text DEFAULT 'ACTIVE' NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"sOSEvent_status_check_7faa7610\" CHECK (\"status\" IN ('ACTIVE', 'RESOLVED', 'FALSE_ALARM'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"sOSEvent\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sOSEvent\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.teamMember",
+    "label": "Create table \"teamMember\"",
+    "summary": "Creates table \"teamMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "teamMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"teamMember\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teamMember\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"teamMember\"",
+        "sql": "CREATE TABLE \"public\".\"teamMember\" (\n  \"id\" text NOT NULL,\n  \"joinedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"role\" text DEFAULT 'MEMBER' NOT NULL,\n  \"teamId\" text NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"teamMember_role_check_bcc5eb78\" CHECK (\"role\" IN ('LEADER', 'COORDINATOR', 'SPECIALIST', 'MEMBER', 'VOLUNTEER'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"teamMember\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teamMember\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.user",
+    "label": "Create table \"user\"",
+    "summary": "Creates table \"user\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"user\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"user\"",
+        "sql": "CREATE TABLE \"public\".\"user\" (\n  \"avatar\" text,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"email\" text,\n  \"fullName\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"password\" text,\n  \"phone\" text,\n  \"role\" text DEFAULT 'USER' NOT NULL,\n  \"status\" text DEFAULT 'ACTIVE' NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"user_role_check_168b6c6a\" CHECK (\"role\" IN ('ADMIN', 'MODERATOR', 'USER', 'RESCUER')),\n  CONSTRAINT \"user_status_check_8fe65f21\" CHECK (\"status\" IN ('ACTIVE', 'INACTIVE', 'BANNED', 'PENDING'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"user\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.warning",
+    "label": "Create table \"warning\"",
+    "summary": "Creates table \"warning\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "warning"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"warning\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"warning\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"warning\"",
+        "sql": "CREATE TABLE \"public\".\"warning\" (\n  \"disasterId\" text NOT NULL,\n  \"expiresAt\" timestamptz,\n  \"id\" text NOT NULL,\n  \"issuedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"message\" text NOT NULL,\n  \"severity\" text NOT NULL,\n  \"title\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"warning_severity_check_5e5a5e80\" CHECK (\"severity\" IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"warning\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"warning\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.conversation.conversation_sosEventId_key",
+    "label": "Add unique constraint on \"conversation\" (sosEventId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "conversation_sosEventId_key",
+        "table": "conversation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"conversation_sosEventId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversation_sosEventId_key",
+          "public",
+          "\"public\".\"conversation\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"conversation_sosEventId_key\"",
+        "sql": "ALTER TABLE \"public\".\"conversation\" ADD CONSTRAINT \"conversation_sosEventId_key\" UNIQUE (\"sosEventId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"conversation_sosEventId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversation_sosEventId_key",
+          "public",
+          "\"public\".\"conversation\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.conversationParticipant.conversationParticipant_conversationId_userId_key",
+    "label": "Add unique constraint on \"conversationParticipant\" (conversationId, userId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "conversationParticipant_conversationId_userId_key",
+        "table": "conversationParticipant"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"conversationParticipant_conversationId_userId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversationParticipant_conversationId_userId_key",
+          "public",
+          "\"public\".\"conversationParticipant\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"conversationParticipant_conversationId_userId_key\"",
+        "sql": "ALTER TABLE \"public\".\"conversationParticipant\" ADD CONSTRAINT \"conversationParticipant_conversationId_userId_key\" UNIQUE (\"conversationId\", \"userId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"conversationParticipant_conversationId_userId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversationParticipant_conversationId_userId_key",
+          "public",
+          "\"public\".\"conversationParticipant\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.rescueProfile.rescueProfile_userId_key",
+    "label": "Add unique constraint on \"rescueProfile\" (userId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "rescueProfile_userId_key",
+        "table": "rescueProfile"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"rescueProfile_userId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueProfile_userId_key",
+          "public",
+          "\"public\".\"rescueProfile\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"rescueProfile_userId_key\"",
+        "sql": "ALTER TABLE \"public\".\"rescueProfile\" ADD CONSTRAINT \"rescueProfile_userId_key\" UNIQUE (\"userId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"rescueProfile_userId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueProfile_userId_key",
+          "public",
+          "\"public\".\"rescueProfile\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.teamMember.teamMember_teamId_userId_key",
+    "label": "Add unique constraint on \"teamMember\" (teamId, userId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "teamMember_teamId_userId_key",
+        "table": "teamMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"teamMember_teamId_userId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teamMember_teamId_userId_key",
+          "public",
+          "\"public\".\"teamMember\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"teamMember_teamId_userId_key\"",
+        "sql": "ALTER TABLE \"public\".\"teamMember\" ADD CONSTRAINT \"teamMember_teamId_userId_key\" UNIQUE (\"teamId\", \"userId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"teamMember_teamId_userId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teamMember_teamId_userId_key",
+          "public",
+          "\"public\".\"teamMember\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.user.user_phone_key",
+    "label": "Add unique constraint on \"user\" (phone)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "user_phone_key",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"user_phone_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_phone_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"user_phone_key\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD CONSTRAINT \"user_phone_key\" UNIQUE (\"phone\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"user_phone_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_phone_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.user.user_email_key",
+    "label": "Add unique constraint on \"user\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "user_email_key",
+        "table": "user"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"user_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_email_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"user_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"user\" ADD CONSTRAINT \"user_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"user_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "user_email_key",
+          "public",
+          "\"public\".\"user\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.conversation.conversation_missionId_idx_25ef2118",
+    "label": "Create index \"conversation_missionId_idx_25ef2118\" on \"conversation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "conversation_missionId_idx_25ef2118",
+        "table": "conversation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"conversation_missionId_idx_25ef2118\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversation_missionId_idx_25ef2118\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"conversation_missionId_idx_25ef2118\"",
+        "sql": "CREATE INDEX \"conversation_missionId_idx_25ef2118\" ON \"public\".\"conversation\" (\"missionId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"conversation_missionId_idx_25ef2118\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversation_missionId_idx_25ef2118\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.conversation.conversation_sosEventId_idx_ca7a2959",
+    "label": "Create index \"conversation_sosEventId_idx_ca7a2959\" on \"conversation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "conversation_sosEventId_idx_ca7a2959",
+        "table": "conversation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"conversation_sosEventId_idx_ca7a2959\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversation_sosEventId_idx_ca7a2959\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"conversation_sosEventId_idx_ca7a2959\"",
+        "sql": "CREATE INDEX \"conversation_sosEventId_idx_ca7a2959\" ON \"public\".\"conversation\" (\"sosEventId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"conversation_sosEventId_idx_ca7a2959\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversation_sosEventId_idx_ca7a2959\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.conversationParticipant.conversationParticipant_conversationId_idx_669215a6",
+    "label": "Create index \"conversationParticipant_conversationId_idx_669215a6\" on \"conversationParticipant\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "conversationParticipant_conversationId_idx_669215a6",
+        "table": "conversationParticipant"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"conversationParticipant_conversationId_idx_669215a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversationParticipant_conversationId_idx_669215a6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"conversationParticipant_conversationId_idx_669215a6\"",
+        "sql": "CREATE INDEX \"conversationParticipant_conversationId_idx_669215a6\" ON \"public\".\"conversationParticipant\" (\"conversationId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"conversationParticipant_conversationId_idx_669215a6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversationParticipant_conversationId_idx_669215a6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.conversationParticipant.conversationParticipant_userId_idx_a489d58a",
+    "label": "Create index \"conversationParticipant_userId_idx_a489d58a\" on \"conversationParticipant\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "conversationParticipant_userId_idx_a489d58a",
+        "table": "conversationParticipant"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"conversationParticipant_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversationParticipant_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"conversationParticipant_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"conversationParticipant_userId_idx_a489d58a\" ON \"public\".\"conversationParticipant\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"conversationParticipant_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"conversationParticipant_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.disaster.disaster_status_idx_e98638ab",
+    "label": "Create index \"disaster_status_idx_e98638ab\" on \"disaster\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "disaster_status_idx_e98638ab",
+        "table": "disaster"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"disaster_status_idx_e98638ab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"disaster_status_idx_e98638ab\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"disaster_status_idx_e98638ab\"",
+        "sql": "CREATE INDEX \"disaster_status_idx_e98638ab\" ON \"public\".\"disaster\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"disaster_status_idx_e98638ab\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"disaster_status_idx_e98638ab\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.disasterArea.disasterArea_disasterId_idx_55cac62a",
+    "label": "Create index \"disasterArea_disasterId_idx_55cac62a\" on \"disasterArea\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "disasterArea_disasterId_idx_55cac62a",
+        "table": "disasterArea"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"disasterArea_disasterId_idx_55cac62a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"disasterArea_disasterId_idx_55cac62a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"disasterArea_disasterId_idx_55cac62a\"",
+        "sql": "CREATE INDEX \"disasterArea_disasterId_idx_55cac62a\" ON \"public\".\"disasterArea\" (\"disasterId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"disasterArea_disasterId_idx_55cac62a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"disasterArea_disasterId_idx_55cac62a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.location.location_userId_idx_a489d58a",
+    "label": "Create index \"location_userId_idx_a489d58a\" on \"location\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "location_userId_idx_a489d58a",
+        "table": "location"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"location_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"location_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"location_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"location_userId_idx_a489d58a\" ON \"public\".\"location\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"location_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"location_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.location.location_userId_timestamp_idx_41d374b1",
+    "label": "Create index \"location_userId_timestamp_idx_41d374b1\" on \"location\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "location_userId_timestamp_idx_41d374b1",
+        "table": "location"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"location_userId_timestamp_idx_41d374b1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"location_userId_timestamp_idx_41d374b1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"location_userId_timestamp_idx_41d374b1\"",
+        "sql": "CREATE INDEX \"location_userId_timestamp_idx_41d374b1\" ON \"public\".\"location\" (\"userId\", \"timestamp\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"location_userId_timestamp_idx_41d374b1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"location_userId_timestamp_idx_41d374b1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message.message_conversationId_idx_669215a6",
+    "label": "Create index \"message_conversationId_idx_669215a6\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_conversationId_idx_669215a6",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_conversationId_idx_669215a6\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_conversationId_idx_669215a6\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_conversationId_idx_669215a6\"",
+        "sql": "CREATE INDEX \"message_conversationId_idx_669215a6\" ON \"public\".\"message\" (\"conversationId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_conversationId_idx_669215a6\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_conversationId_idx_669215a6\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message.message_conversationId_sentAt_idx_75e06486",
+    "label": "Create index \"message_conversationId_sentAt_idx_75e06486\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_conversationId_sentAt_idx_75e06486",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_conversationId_sentAt_idx_75e06486\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_conversationId_sentAt_idx_75e06486\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_conversationId_sentAt_idx_75e06486\"",
+        "sql": "CREATE INDEX \"message_conversationId_sentAt_idx_75e06486\" ON \"public\".\"message\" (\"conversationId\", \"sentAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_conversationId_sentAt_idx_75e06486\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_conversationId_sentAt_idx_75e06486\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.message.message_senderId_idx_4689c490",
+    "label": "Create index \"message_senderId_idx_4689c490\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "message_senderId_idx_4689c490",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"message_senderId_idx_4689c490\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_senderId_idx_4689c490\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"message_senderId_idx_4689c490\"",
+        "sql": "CREATE INDEX \"message_senderId_idx_4689c490\" ON \"public\".\"message\" (\"senderId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"message_senderId_idx_4689c490\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"message_senderId_idx_4689c490\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.notification.notification_recipientId_idx_c9527cf8",
+    "label": "Create index \"notification_recipientId_idx_c9527cf8\" on \"notification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "notification_recipientId_idx_c9527cf8",
+        "table": "notification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"notification_recipientId_idx_c9527cf8\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"notification_recipientId_idx_c9527cf8\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"notification_recipientId_idx_c9527cf8\"",
+        "sql": "CREATE INDEX \"notification_recipientId_idx_c9527cf8\" ON \"public\".\"notification\" (\"recipientId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"notification_recipientId_idx_c9527cf8\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"notification_recipientId_idx_c9527cf8\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.notification.notification_recipientId_read_idx_e1936911",
+    "label": "Create index \"notification_recipientId_read_idx_e1936911\" on \"notification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "notification_recipientId_read_idx_e1936911",
+        "table": "notification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"notification_recipientId_read_idx_e1936911\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"notification_recipientId_read_idx_e1936911\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"notification_recipientId_read_idx_e1936911\"",
+        "sql": "CREATE INDEX \"notification_recipientId_read_idx_e1936911\" ON \"public\".\"notification\" (\"recipientId\", \"read\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"notification_recipientId_read_idx_e1936911\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"notification_recipientId_read_idx_e1936911\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.rescueMission.rescueMission_requestId_idx_fd667f92",
+    "label": "Create index \"rescueMission_requestId_idx_fd667f92\" on \"rescueMission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "rescueMission_requestId_idx_fd667f92",
+        "table": "rescueMission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"rescueMission_requestId_idx_fd667f92\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission_requestId_idx_fd667f92\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"rescueMission_requestId_idx_fd667f92\"",
+        "sql": "CREATE INDEX \"rescueMission_requestId_idx_fd667f92\" ON \"public\".\"rescueMission\" (\"requestId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"rescueMission_requestId_idx_fd667f92\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission_requestId_idx_fd667f92\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.rescueMission.rescueMission_rescuerId_idx_5ff6cf03",
+    "label": "Create index \"rescueMission_rescuerId_idx_5ff6cf03\" on \"rescueMission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "rescueMission_rescuerId_idx_5ff6cf03",
+        "table": "rescueMission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"rescueMission_rescuerId_idx_5ff6cf03\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission_rescuerId_idx_5ff6cf03\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"rescueMission_rescuerId_idx_5ff6cf03\"",
+        "sql": "CREATE INDEX \"rescueMission_rescuerId_idx_5ff6cf03\" ON \"public\".\"rescueMission\" (\"rescuerId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"rescueMission_rescuerId_idx_5ff6cf03\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission_rescuerId_idx_5ff6cf03\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.rescueMission.rescueMission_status_idx_e98638ab",
+    "label": "Create index \"rescueMission_status_idx_e98638ab\" on \"rescueMission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "rescueMission_status_idx_e98638ab",
+        "table": "rescueMission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"rescueMission_status_idx_e98638ab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission_status_idx_e98638ab\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"rescueMission_status_idx_e98638ab\"",
+        "sql": "CREATE INDEX \"rescueMission_status_idx_e98638ab\" ON \"public\".\"rescueMission\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"rescueMission_status_idx_e98638ab\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission_status_idx_e98638ab\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.rescueMission.rescueMission_teamId_idx_f2b72ab3",
+    "label": "Create index \"rescueMission_teamId_idx_f2b72ab3\" on \"rescueMission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "rescueMission_teamId_idx_f2b72ab3",
+        "table": "rescueMission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"rescueMission_teamId_idx_f2b72ab3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission_teamId_idx_f2b72ab3\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"rescueMission_teamId_idx_f2b72ab3\"",
+        "sql": "CREATE INDEX \"rescueMission_teamId_idx_f2b72ab3\" ON \"public\".\"rescueMission\" (\"teamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"rescueMission_teamId_idx_f2b72ab3\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueMission_teamId_idx_f2b72ab3\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.rescueRequest.rescueRequest_requesterId_idx_a5f4af92",
+    "label": "Create index \"rescueRequest_requesterId_idx_a5f4af92\" on \"rescueRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "rescueRequest_requesterId_idx_a5f4af92",
+        "table": "rescueRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"rescueRequest_requesterId_idx_a5f4af92\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueRequest_requesterId_idx_a5f4af92\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"rescueRequest_requesterId_idx_a5f4af92\"",
+        "sql": "CREATE INDEX \"rescueRequest_requesterId_idx_a5f4af92\" ON \"public\".\"rescueRequest\" (\"requesterId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"rescueRequest_requesterId_idx_a5f4af92\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueRequest_requesterId_idx_a5f4af92\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.rescueRequest.rescueRequest_status_idx_e98638ab",
+    "label": "Create index \"rescueRequest_status_idx_e98638ab\" on \"rescueRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "rescueRequest_status_idx_e98638ab",
+        "table": "rescueRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"rescueRequest_status_idx_e98638ab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueRequest_status_idx_e98638ab\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"rescueRequest_status_idx_e98638ab\"",
+        "sql": "CREATE INDEX \"rescueRequest_status_idx_e98638ab\" ON \"public\".\"rescueRequest\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"rescueRequest_status_idx_e98638ab\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueRequest_status_idx_e98638ab\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.rescueTeam.rescueTeam_leaderId_idx_f25e7cb1",
+    "label": "Create index \"rescueTeam_leaderId_idx_f25e7cb1\" on \"rescueTeam\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "rescueTeam_leaderId_idx_f25e7cb1",
+        "table": "rescueTeam"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"rescueTeam_leaderId_idx_f25e7cb1\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueTeam_leaderId_idx_f25e7cb1\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"rescueTeam_leaderId_idx_f25e7cb1\"",
+        "sql": "CREATE INDEX \"rescueTeam_leaderId_idx_f25e7cb1\" ON \"public\".\"rescueTeam\" (\"leaderId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"rescueTeam_leaderId_idx_f25e7cb1\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"rescueTeam_leaderId_idx_f25e7cb1\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.sOSEvent.sOSEvent_status_idx_e98638ab",
+    "label": "Create index \"sOSEvent_status_idx_e98638ab\" on \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "sOSEvent_status_idx_e98638ab",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"sOSEvent_status_idx_e98638ab\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sOSEvent_status_idx_e98638ab\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"sOSEvent_status_idx_e98638ab\"",
+        "sql": "CREATE INDEX \"sOSEvent_status_idx_e98638ab\" ON \"public\".\"sOSEvent\" (\"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"sOSEvent_status_idx_e98638ab\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sOSEvent_status_idx_e98638ab\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.sOSEvent.sOSEvent_userId_idx_a489d58a",
+    "label": "Create index \"sOSEvent_userId_idx_a489d58a\" on \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "sOSEvent_userId_idx_a489d58a",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"sOSEvent_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sOSEvent_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"sOSEvent_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"sOSEvent_userId_idx_a489d58a\" ON \"public\".\"sOSEvent\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"sOSEvent_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"sOSEvent_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.teamMember.teamMember_teamId_idx_f2b72ab3",
+    "label": "Create index \"teamMember_teamId_idx_f2b72ab3\" on \"teamMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "teamMember_teamId_idx_f2b72ab3",
+        "table": "teamMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"teamMember_teamId_idx_f2b72ab3\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teamMember_teamId_idx_f2b72ab3\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"teamMember_teamId_idx_f2b72ab3\"",
+        "sql": "CREATE INDEX \"teamMember_teamId_idx_f2b72ab3\" ON \"public\".\"teamMember\" (\"teamId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"teamMember_teamId_idx_f2b72ab3\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teamMember_teamId_idx_f2b72ab3\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.teamMember.teamMember_userId_idx_a489d58a",
+    "label": "Create index \"teamMember_userId_idx_a489d58a\" on \"teamMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "teamMember_userId_idx_a489d58a",
+        "table": "teamMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"teamMember_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teamMember_userId_idx_a489d58a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"teamMember_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"teamMember_userId_idx_a489d58a\" ON \"public\".\"teamMember\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"teamMember_userId_idx_a489d58a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"teamMember_userId_idx_a489d58a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.warning.warning_disasterId_idx_55cac62a",
+    "label": "Create index \"warning_disasterId_idx_55cac62a\" on \"warning\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "warning_disasterId_idx_55cac62a",
+        "table": "warning"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"warning_disasterId_idx_55cac62a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"warning_disasterId_idx_55cac62a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"warning_disasterId_idx_55cac62a\"",
+        "sql": "CREATE INDEX \"warning_disasterId_idx_55cac62a\" ON \"public\".\"warning\" (\"disasterId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"warning_disasterId_idx_55cac62a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"warning_disasterId_idx_55cac62a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.warning.warning_issuedAt_expiresAt_idx_960ebd43",
+    "label": "Create index \"warning_issuedAt_expiresAt_idx_960ebd43\" on \"warning\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "warning_issuedAt_expiresAt_idx_960ebd43",
+        "table": "warning"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"warning_issuedAt_expiresAt_idx_960ebd43\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"warning_issuedAt_expiresAt_idx_960ebd43\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"warning_issuedAt_expiresAt_idx_960ebd43\"",
+        "sql": "CREATE INDEX \"warning_issuedAt_expiresAt_idx_960ebd43\" ON \"public\".\"warning\" (\"issuedAt\", \"expiresAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"warning_issuedAt_expiresAt_idx_960ebd43\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"warning_issuedAt_expiresAt_idx_960ebd43\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.conversation.conversation_missionId_fkey",
+    "label": "Add foreign key \"conversation_missionId_fkey\" on \"conversation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "conversation_missionId_fkey",
+        "table": "conversation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"conversation_missionId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversation_missionId_fkey",
+          "public",
+          "\"public\".\"conversation\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"conversation_missionId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"conversation\"\nADD CONSTRAINT \"conversation_missionId_fkey\"\nFOREIGN KEY (\"missionId\")\nREFERENCES \"public\".\"rescueMission\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"conversation_missionId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversation_missionId_fkey",
+          "public",
+          "\"public\".\"conversation\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.conversation.conversation_sosEventId_fkey",
+    "label": "Add foreign key \"conversation_sosEventId_fkey\" on \"conversation\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "conversation_sosEventId_fkey",
+        "table": "conversation"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"conversation_sosEventId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversation_sosEventId_fkey",
+          "public",
+          "\"public\".\"conversation\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"conversation_sosEventId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"conversation\"\nADD CONSTRAINT \"conversation_sosEventId_fkey\"\nFOREIGN KEY (\"sosEventId\")\nREFERENCES \"public\".\"sOSEvent\" (\"id\")\nON DELETE SET NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"conversation_sosEventId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversation_sosEventId_fkey",
+          "public",
+          "\"public\".\"conversation\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.conversationParticipant.conversationParticipant_conversationId_fkey",
+    "label": "Add foreign key \"conversationParticipant_conversationId_fkey\" on \"conversationParticipant\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "conversationParticipant_conversationId_fkey",
+        "table": "conversationParticipant"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"conversationParticipant_conversationId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversationParticipant_conversationId_fkey",
+          "public",
+          "\"public\".\"conversationParticipant\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"conversationParticipant_conversationId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"conversationParticipant\"\nADD CONSTRAINT \"conversationParticipant_conversationId_fkey\"\nFOREIGN KEY (\"conversationId\")\nREFERENCES \"public\".\"conversation\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"conversationParticipant_conversationId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversationParticipant_conversationId_fkey",
+          "public",
+          "\"public\".\"conversationParticipant\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.conversationParticipant.conversationParticipant_userId_fkey",
+    "label": "Add foreign key \"conversationParticipant_userId_fkey\" on \"conversationParticipant\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "conversationParticipant_userId_fkey",
+        "table": "conversationParticipant"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"conversationParticipant_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversationParticipant_userId_fkey",
+          "public",
+          "\"public\".\"conversationParticipant\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"conversationParticipant_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"conversationParticipant\"\nADD CONSTRAINT \"conversationParticipant_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"conversationParticipant_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "conversationParticipant_userId_fkey",
+          "public",
+          "\"public\".\"conversationParticipant\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.disasterArea.disasterArea_disasterId_fkey",
+    "label": "Add foreign key \"disasterArea_disasterId_fkey\" on \"disasterArea\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "disasterArea_disasterId_fkey",
+        "table": "disasterArea"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"disasterArea_disasterId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "disasterArea_disasterId_fkey",
+          "public",
+          "\"public\".\"disasterArea\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"disasterArea_disasterId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"disasterArea\"\nADD CONSTRAINT \"disasterArea_disasterId_fkey\"\nFOREIGN KEY (\"disasterId\")\nREFERENCES \"public\".\"disaster\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"disasterArea_disasterId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "disasterArea_disasterId_fkey",
+          "public",
+          "\"public\".\"disasterArea\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.location.location_userId_fkey",
+    "label": "Add foreign key \"location_userId_fkey\" on \"location\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "location_userId_fkey",
+        "table": "location"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"location_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "location_userId_fkey",
+          "public",
+          "\"public\".\"location\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"location_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"location\"\nADD CONSTRAINT \"location_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"location_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "location_userId_fkey",
+          "public",
+          "\"public\".\"location\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.message.message_conversationId_fkey",
+    "label": "Add foreign key \"message_conversationId_fkey\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "message_conversationId_fkey",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"message_conversationId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "message_conversationId_fkey",
+          "public",
+          "\"public\".\"message\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"message_conversationId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"message\"\nADD CONSTRAINT \"message_conversationId_fkey\"\nFOREIGN KEY (\"conversationId\")\nREFERENCES \"public\".\"conversation\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"message_conversationId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "message_conversationId_fkey",
+          "public",
+          "\"public\".\"message\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.message.message_senderId_fkey",
+    "label": "Add foreign key \"message_senderId_fkey\" on \"message\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "message_senderId_fkey",
+        "table": "message"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"message_senderId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "message_senderId_fkey",
+          "public",
+          "\"public\".\"message\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"message_senderId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"message\"\nADD CONSTRAINT \"message_senderId_fkey\"\nFOREIGN KEY (\"senderId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"message_senderId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "message_senderId_fkey",
+          "public",
+          "\"public\".\"message\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.notification.notification_recipientId_fkey",
+    "label": "Add foreign key \"notification_recipientId_fkey\" on \"notification\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "notification_recipientId_fkey",
+        "table": "notification"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"notification_recipientId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "notification_recipientId_fkey",
+          "public",
+          "\"public\".\"notification\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"notification_recipientId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"notification\"\nADD CONSTRAINT \"notification_recipientId_fkey\"\nFOREIGN KEY (\"recipientId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"notification_recipientId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "notification_recipientId_fkey",
+          "public",
+          "\"public\".\"notification\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.rescueMission.rescueMission_requestId_fkey",
+    "label": "Add foreign key \"rescueMission_requestId_fkey\" on \"rescueMission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "rescueMission_requestId_fkey",
+        "table": "rescueMission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"rescueMission_requestId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueMission_requestId_fkey",
+          "public",
+          "\"public\".\"rescueMission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"rescueMission_requestId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"rescueMission\"\nADD CONSTRAINT \"rescueMission_requestId_fkey\"\nFOREIGN KEY (\"requestId\")\nREFERENCES \"public\".\"rescueRequest\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"rescueMission_requestId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueMission_requestId_fkey",
+          "public",
+          "\"public\".\"rescueMission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.rescueMission.rescueMission_teamId_fkey",
+    "label": "Add foreign key \"rescueMission_teamId_fkey\" on \"rescueMission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "rescueMission_teamId_fkey",
+        "table": "rescueMission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"rescueMission_teamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueMission_teamId_fkey",
+          "public",
+          "\"public\".\"rescueMission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"rescueMission_teamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"rescueMission\"\nADD CONSTRAINT \"rescueMission_teamId_fkey\"\nFOREIGN KEY (\"teamId\")\nREFERENCES \"public\".\"rescueTeam\" (\"id\")\nON DELETE SET NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"rescueMission_teamId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueMission_teamId_fkey",
+          "public",
+          "\"public\".\"rescueMission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.rescueMission.rescueMission_rescuerId_fkey",
+    "label": "Add foreign key \"rescueMission_rescuerId_fkey\" on \"rescueMission\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "rescueMission_rescuerId_fkey",
+        "table": "rescueMission"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"rescueMission_rescuerId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueMission_rescuerId_fkey",
+          "public",
+          "\"public\".\"rescueMission\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"rescueMission_rescuerId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"rescueMission\"\nADD CONSTRAINT \"rescueMission_rescuerId_fkey\"\nFOREIGN KEY (\"rescuerId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE SET NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"rescueMission_rescuerId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueMission_rescuerId_fkey",
+          "public",
+          "\"public\".\"rescueMission\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.rescueProfile.rescueProfile_userId_fkey",
+    "label": "Add foreign key \"rescueProfile_userId_fkey\" on \"rescueProfile\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "rescueProfile_userId_fkey",
+        "table": "rescueProfile"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"rescueProfile_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueProfile_userId_fkey",
+          "public",
+          "\"public\".\"rescueProfile\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"rescueProfile_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"rescueProfile\"\nADD CONSTRAINT \"rescueProfile_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"rescueProfile_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueProfile_userId_fkey",
+          "public",
+          "\"public\".\"rescueProfile\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.rescueRequest.rescueRequest_requesterId_fkey",
+    "label": "Add foreign key \"rescueRequest_requesterId_fkey\" on \"rescueRequest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "rescueRequest_requesterId_fkey",
+        "table": "rescueRequest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"rescueRequest_requesterId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueRequest_requesterId_fkey",
+          "public",
+          "\"public\".\"rescueRequest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"rescueRequest_requesterId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"rescueRequest\"\nADD CONSTRAINT \"rescueRequest_requesterId_fkey\"\nFOREIGN KEY (\"requesterId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"rescueRequest_requesterId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueRequest_requesterId_fkey",
+          "public",
+          "\"public\".\"rescueRequest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.rescueTeam.rescueTeam_leaderId_fkey",
+    "label": "Add foreign key \"rescueTeam_leaderId_fkey\" on \"rescueTeam\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "rescueTeam_leaderId_fkey",
+        "table": "rescueTeam"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"rescueTeam_leaderId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueTeam_leaderId_fkey",
+          "public",
+          "\"public\".\"rescueTeam\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"rescueTeam_leaderId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"rescueTeam\"\nADD CONSTRAINT \"rescueTeam_leaderId_fkey\"\nFOREIGN KEY (\"leaderId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE RESTRICT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"rescueTeam_leaderId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "rescueTeam_leaderId_fkey",
+          "public",
+          "\"public\".\"rescueTeam\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.sOSEvent.sOSEvent_userId_fkey",
+    "label": "Add foreign key \"sOSEvent_userId_fkey\" on \"sOSEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "sOSEvent_userId_fkey",
+        "table": "sOSEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"sOSEvent_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sOSEvent_userId_fkey",
+          "public",
+          "\"public\".\"sOSEvent\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"sOSEvent_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"sOSEvent\"\nADD CONSTRAINT \"sOSEvent_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"sOSEvent_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "sOSEvent_userId_fkey",
+          "public",
+          "\"public\".\"sOSEvent\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.teamMember.teamMember_teamId_fkey",
+    "label": "Add foreign key \"teamMember_teamId_fkey\" on \"teamMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "teamMember_teamId_fkey",
+        "table": "teamMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"teamMember_teamId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teamMember_teamId_fkey",
+          "public",
+          "\"public\".\"teamMember\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"teamMember_teamId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"teamMember\"\nADD CONSTRAINT \"teamMember_teamId_fkey\"\nFOREIGN KEY (\"teamId\")\nREFERENCES \"public\".\"rescueTeam\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"teamMember_teamId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teamMember_teamId_fkey",
+          "public",
+          "\"public\".\"teamMember\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.teamMember.teamMember_userId_fkey",
+    "label": "Add foreign key \"teamMember_userId_fkey\" on \"teamMember\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "teamMember_userId_fkey",
+        "table": "teamMember"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"teamMember_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teamMember_userId_fkey",
+          "public",
+          "\"public\".\"teamMember\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"teamMember_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"teamMember\"\nADD CONSTRAINT \"teamMember_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"user\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"teamMember_userId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "teamMember_userId_fkey",
+          "public",
+          "\"public\".\"teamMember\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.warning.warning_disasterId_fkey",
+    "label": "Add foreign key \"warning_disasterId_fkey\" on \"warning\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "warning_disasterId_fkey",
+        "table": "warning"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"warning_disasterId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "warning_disasterId_fkey",
+          "public",
+          "\"public\".\"warning\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"warning_disasterId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"warning\"\nADD CONSTRAINT \"warning_disasterId_fkey\"\nFOREIGN KEY (\"disasterId\")\nREFERENCES \"public\".\"disaster\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"warning_disasterId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "warning_disasterId_fkey",
+          "public",
+          "\"public\".\"warning\""
+        ]
+      }
+    ]
+  }
+]
