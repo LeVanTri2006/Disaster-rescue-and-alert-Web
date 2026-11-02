@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Req, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Put, Param, Delete, Query, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { RescueMissionsService } from './rescue-missions.service';
 import { CreateRescueMissionDto } from './dto/create-rescue-mission.dto';
 import { UpdateRescueMissionDto } from './dto/update-rescue-mission.dto';
@@ -73,6 +73,21 @@ export class RescueMissionsController {
 
     const result = await this.rescueMissionsService.update(id, updateRescueMissionDto, userRole, userId);
     return { success: true, data: result };
+  }
+
+  @Put(':id')
+  async updatePut(@Req() req: any, @Param('id') id: string, @Body() updateRescueMissionDto: UpdateRescueMissionDto) {
+    return this.update(req, id, updateRescueMissionDto);
+  }
+
+  @Patch(':id/status')
+  async updateStatusPatch(@Req() req: any, @Param('id') id: string, @Body() updateRescueMissionDto: UpdateRescueMissionDto) {
+    return this.update(req, id, updateRescueMissionDto);
+  }
+
+  @Put(':id/status')
+  async updateStatusPut(@Req() req: any, @Param('id') id: string, @Body() updateRescueMissionDto: UpdateRescueMissionDto) {
+    return this.update(req, id, updateRescueMissionDto);
   }
 
   @Delete(':id')

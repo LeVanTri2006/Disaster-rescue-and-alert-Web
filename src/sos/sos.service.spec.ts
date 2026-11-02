@@ -185,6 +185,28 @@ describe('SosService', () => {
     })).rejects.toBeInstanceOf(ConflictException);
   });
 
+  it('auto-resolves an existing SOS if it is older than 3 days and allows creating new SOS', async () => {
+    const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000);
+    const updateMock = jest.fn().mockResolvedValue({ id: 'existing-old', status: 'RESOLVED' });
+    sosModel.where.mockReturnValue({
+      first: jest.fn().mockResolvedValue({ id: 'existing-old', createdAt: fourDaysAgo }),
+      update: updateMock,
+    });
+    rawRows = [event({ eventId: 'sos-1', userId: 'user-1' })];
+
+    const result = await service.create('user-1', {
+      adults: 1,
+      children: 0,
+      elderly: 0,
+      condition: 'Bị thương',
+      latitude: 10,
+      longitude: 20,
+    });
+
+    expect(updateMock).toHaveBeenCalledWith({ status: 'RESOLVED' });
+    expect(result.eventId).toBe('sos-1');
+  });
+
   it('rejects invalid coordinates and radius', async () => {
     await expect(service.findNearby(91, 20, 100)).rejects.toBeInstanceOf(BadRequestException);
     await expect(service.findNearby(10, 20, 100001)).rejects.toBeInstanceOf(BadRequestException);

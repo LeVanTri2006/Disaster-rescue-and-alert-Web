@@ -17,9 +17,11 @@ export class RescueMissionsService {
 
     switch (from) {
       case MissionStatus.ASSIGNED:
-        return [MissionStatus.IN_ROUTE, MissionStatus.CANCELLED, MissionStatus.FAILED].includes(to);
+        return [MissionStatus.IN_ROUTE, MissionStatus.ARRIVED, MissionStatus.IN_PROGRESS, MissionStatus.CANCELLED, MissionStatus.FAILED].includes(to);
       case MissionStatus.IN_ROUTE:
-        return [MissionStatus.IN_PROGRESS, MissionStatus.CANCELLED, MissionStatus.FAILED].includes(to);
+        return [MissionStatus.ARRIVED, MissionStatus.IN_PROGRESS, MissionStatus.COMPLETED, MissionStatus.CANCELLED, MissionStatus.FAILED].includes(to);
+      case MissionStatus.ARRIVED:
+        return [MissionStatus.IN_PROGRESS, MissionStatus.COMPLETED, MissionStatus.CANCELLED, MissionStatus.FAILED].includes(to);
       case MissionStatus.IN_PROGRESS:
         return [MissionStatus.COMPLETED, MissionStatus.CANCELLED, MissionStatus.FAILED].includes(to);
       case MissionStatus.COMPLETED:
@@ -82,7 +84,7 @@ export class RescueMissionsService {
         requestId: createDto.requestId,
         rescuerId: createDto.rescuerId,
         teamId: createDto.teamId,
-        status: initialStatus,
+        status: initialStatus as any,
         notes: createDto.notes,
       });
 
@@ -123,7 +125,18 @@ export class RescueMissionsService {
     let data = await this.prisma.db.orm.public.RescueMission.where(where).all();
     data = data.slice(skip, skip + limit);
 
-    return { total, page, limit, data };
+    // Enrich each mission with request and rescuer info so client has full details
+    const enrichedData = await Promise.all(
+      data.map(async (m: any) => {
+        try {
+          return await this.findOne(m.id);
+        } catch {
+          return m;
+        }
+      })
+    );
+
+    return { total, page, limit, data: enrichedData };
   }
 
   async findOne(id: string) {
@@ -135,7 +148,66 @@ export class RescueMissionsService {
     
     // Populate request manually if needed
     const request = await this.prisma.db.orm.public.RescueRequest.where({ id: mission.requestId }).first();
-    return { ...mission, request };
+    let enrichedRequest: any = request;
+    let rescuerInfo: any = {};
+    
+    if (mission.rescuerId) {
+      try {
+        const rescuer = await this.prisma.db.orm.public.User.where({ id: mission.rescuerId }).first();
+        if (rescuer) {
+          rescuerInfo = {
+            rescuerName: rescuer.fullName,
+            rescuerPhone: rescuer.phone,
+          };
+        }
+      } catch (_) {}
+    }
+
+    if (request) {
+      enrichedRequest = { ...request };
+      try {
+        if (request.requesterId) {
+          const requester = await this.prisma.db.orm.public.User.where({ id: request.requesterId }).first();
+          if (requester) {
+            enrichedRequest.requesterName = requester.fullName;
+            enrichedRequest.requesterPhone = requester.phone;
+          }
+        }
+        if (request.sosEventId) {
+          const sos = await this.prisma.db.orm.public.SOSEvent.where({ id: request.sosEventId }).first();
+          if (sos) {
+            enrichedRequest.adults = sos.adults;
+            enrichedRequest.children = sos.children;
+            enrichedRequest.elderly = sos.elderly;
+            enrichedRequest.photoUrl = sos.photoUrl;
+            enrichedRequest.emergencyType = sos.emergencyType;
+            enrichedRequest.neededItems = sos.neededItems || [];
+            if (!enrichedRequest.description && sos.message) {
+              enrichedRequest.description = sos.message;
+            }
+          }
+        }
+        const coordQuery = (this.prisma.db as any).raw.sql`
+          SELECT ST_X(location::geometry) as lon, ST_Y(location::geometry) as lat
+          FROM public."rescueRequest"
+          WHERE id = ${request.id}
+        `.returnsRow({
+          lon: 'pg/float8@1',
+          lat: 'pg/float8@1',
+        }).build();
+        const coordRes: any = await this.prisma.db.runtime().query(coordQuery);
+        if (coordRes && coordRes[0]) {
+          enrichedRequest.longitude = coordRes[0].lon;
+          enrichedRequest.latitude = coordRes[0].lat;
+          enrichedRequest.location = {
+            type: 'Point',
+            coordinates: [coordRes[0].lon, coordRes[0].lat],
+          };
+        }
+      } catch (_) {}
+    }
+
+    return { ...mission, ...rescuerInfo, request: enrichedRequest };
   }
 
   async update(id: string, updateDto: UpdateRescueMissionDto, userRole: UserRole, userId: string) {
@@ -180,8 +252,8 @@ export class RescueMissionsService {
         updates.status = updateDto.status;
 
         // Set timestamps
-        if (updateDto.status === MissionStatus.IN_ROUTE) updates.acceptedAt = (globalThis as any).Temporal.Now.instant() as any;
-        if (updateDto.status === MissionStatus.IN_PROGRESS) updates.startedAt = (globalThis as any).Temporal.Now.instant() as any;
+        if (updateDto.status === MissionStatus.IN_ROUTE && !mission.acceptedAt) updates.acceptedAt = (globalThis as any).Temporal.Now.instant() as any;
+        if (updateDto.status === MissionStatus.IN_PROGRESS && !mission.startedAt) updates.startedAt = (globalThis as any).Temporal.Now.instant() as any;
         if ([MissionStatus.COMPLETED, MissionStatus.CANCELLED, MissionStatus.FAILED].includes(updateDto.status as MissionStatus)) {
           updates.completedAt = (globalThis as any).Temporal.Now.instant() as any;
         }
@@ -198,7 +270,7 @@ export class RescueMissionsService {
         let newRequestStatus = request.status;
         const currentReqStatus = request.status as RescueRequestStatus;
 
-        if (updateDto.status === MissionStatus.IN_PROGRESS) {
+        if (updateDto.status === MissionStatus.ARRIVED || updateDto.status === MissionStatus.IN_PROGRESS) {
           newRequestStatus = RescueRequestStatus.IN_PROGRESS;
         } else if (updateDto.status === MissionStatus.COMPLETED) {
           newRequestStatus = RescueRequestStatus.RESOLVED;
@@ -206,7 +278,7 @@ export class RescueMissionsService {
           // If cancelled/failed, check if there are other active missions for this request
           const allMissions = await tx.orm.public.RescueMission.where({ requestId: mission.requestId }).all();
           const otherActiveMissions = allMissions.some((m: any) => 
-            m.id !== mission.id && [MissionStatus.ASSIGNED, MissionStatus.IN_ROUTE, MissionStatus.IN_PROGRESS].includes(m.status as MissionStatus)
+            m.id !== mission.id && [MissionStatus.ASSIGNED, MissionStatus.IN_ROUTE, MissionStatus.ARRIVED, MissionStatus.IN_PROGRESS].includes(m.status as MissionStatus)
           );
           if (!otherActiveMissions) {
             newRequestStatus = RescueRequestStatus.PENDING;
@@ -263,7 +335,7 @@ export class RescueMissionsService {
       acceptedAt: (globalThis as any).Temporal.Now.instant() as any,
     });
 
-    return mission;
+    return await this.findOne(mission.id);
   }
 }
 

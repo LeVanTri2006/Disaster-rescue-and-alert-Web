@@ -62,7 +62,15 @@ export class SosService {
       .where({ userId, status: 'ACTIVE' })
       .first();
     if (existing) {
-      throw new ConflictException('User already has an active SOS event');
+      const createdTime = this.toEpochMillis(existing.createdAt);
+      const isExpired = Date.now() - createdTime > 3 * 24 * 60 * 60 * 1000;
+      if (isExpired) {
+        await this.prisma.db.orm.public.SOSEvent
+          .where({ id: existing.id })
+          .update({ status: 'RESOLVED' });
+      } else {
+        throw new ConflictException('User already has an active SOS event');
+      }
     }
 
     const neededItems = (dto.neededItems ?? []).map((item) => item.trim());
@@ -223,6 +231,7 @@ export class SosService {
         e."transportMode"
       FROM "public"."sOSEvent" e
       WHERE e."status" = 'ACTIVE'::text
+        AND e."createdAt" >= NOW() - INTERVAL '3 days'
       ORDER BY e."createdAt" DESC
     `.returnsRow(sosRowSpec).build();
     const rows = await this.prisma.db.runtime().query(plan);
@@ -305,6 +314,7 @@ export class SosService {
         ) AS "distanceMeters"
       FROM "public"."sOSEvent" e
       WHERE e."status" = 'ACTIVE'::text
+        AND e."createdAt" >= NOW() - INTERVAL '3 days'
         AND ST_DWithin(
           e."location"::geography,
           ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography,
@@ -385,7 +395,7 @@ export class SosService {
       photos: Array.isArray(event.photos) ? event.photos : [],
       createdAt: this.toIsoString(event.createdAt),
       batteryPercent: event.batteryPercent == null ? null : Number(event.batteryPercent),
-      updatedAt: (globalThis as any).Temporal.Now.instant() as any,
+      updatedAt: new Date().toISOString(),
     };
 
     try {
@@ -402,6 +412,17 @@ export class SosService {
     if (value instanceof Date) return value.toISOString();
     if (value && typeof value === 'object' && 'toString' in value) return String(value);
     return new Date(String(value)).toISOString();
+  }
+
+  private toEpochMillis(value: unknown): number {
+    if (!value) return Date.now();
+    if (typeof (value as any).epochMilliseconds === 'number') {
+      return (value as any).epochMilliseconds;
+    }
+    if (value instanceof Date) {
+      return value.getTime();
+    }
+    return new Date(String(value)).getTime();
   }
 
   private async getPresignedGetUrl(objectKey: string): Promise<string | null> {

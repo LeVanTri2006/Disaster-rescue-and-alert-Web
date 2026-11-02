@@ -109,13 +109,22 @@ export class RescueRequestsService {
 
     // Convert coordinates to geography for accurate distance calculation in meters
     const rawSql = (this.prisma.db as any).raw.sql`
-      SELECT id, "requesterId", "sosEventId", "peopleCount", urgency, description, status, "createdAt"::text, "updatedAt"::text,
-             ST_X(location::geometry) as longitude,
-             ST_Y(location::geometry) as latitude,
-             ST_Distance(location::geography, ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography) as distance
-      FROM "public"."rescueRequest"
+      SELECT r.id, r."requesterId", r."sosEventId", r."peopleCount", r.urgency, r.description, r.status, r."createdAt"::text, r."updatedAt"::text,
+             u."fullName" as "requesterName",
+             u.phone as "requesterPhone",
+             s."photoUrl",
+             s."adults",
+             s."children",
+             s."elderly",
+             s."emergencyType",
+             ST_X(r.location::geometry) as longitude,
+             ST_Y(r.location::geometry) as latitude,
+             ST_Distance(r.location::geography, ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography) as distance
+      FROM "public"."rescueRequest" r
+      LEFT JOIN "public"."user" u ON r."requesterId" = u.id
+      LEFT JOIN "public"."sOSEvent" s ON r."sosEventId" = s.id
       WHERE ST_DWithin(
-        location::geography,
+        r.location::geography,
         ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)::geography,
         ${radiusInMeters}
       )
@@ -131,6 +140,13 @@ export class RescueRequestsService {
       status: 'pg/text@1',
       createdAt: 'pg/text@1',
       updatedAt: 'pg/text@1',
+      requesterName: 'pg/text@1',
+      requesterPhone: 'pg/text@1',
+      photoUrl: 'pg/text@1',
+      adults: 'pg/int4@1',
+      children: 'pg/int4@1',
+      elderly: 'pg/int4@1',
+      emergencyType: 'pg/text@1',
       longitude: 'pg/float8@1',
       latitude: 'pg/float8@1',
       distance: 'pg/float8@1'
@@ -151,7 +167,48 @@ export class RescueRequestsService {
     if (!request) {
       throw new NotFoundException('Rescue request not found');
     }
-    return request;
+    let enriched: any = { ...request };
+    try {
+      if (request.requesterId) {
+        const requester = await this.prisma.db.orm.public.User.where({ id: request.requesterId }).first();
+        if (requester) {
+          enriched.requesterName = requester.fullName || requester.email;
+          enriched.requesterPhone = requester.phone;
+        }
+      }
+      if (request.sosEventId) {
+        const sos = await this.prisma.db.orm.public.SOSEvent.where({ id: request.sosEventId }).first();
+        if (sos) {
+          enriched.adults = sos.adults;
+          enriched.children = sos.children;
+          enriched.elderly = sos.elderly;
+          enriched.photoUrl = sos.photoUrl;
+          enriched.emergencyType = sos.emergencyType;
+          enriched.neededItems = sos.neededItems || [];
+          if (!enriched.description && sos.message) {
+            enriched.description = sos.message;
+          }
+        }
+      }
+      const coordQuery = (this.prisma.db as any).raw.sql`
+        SELECT ST_X(location::geometry) as lon, ST_Y(location::geometry) as lat
+        FROM public."rescueRequest"
+        WHERE id = ${request.id}
+      `.returnsRow({
+        lon: 'pg/float8@1',
+        lat: 'pg/float8@1',
+      }).build();
+      const coordRes: any = await this.prisma.db.runtime().query(coordQuery);
+      if (coordRes && coordRes[0]) {
+        enriched.longitude = coordRes[0].lon;
+        enriched.latitude = coordRes[0].lat;
+        enriched.location = {
+          type: 'Point',
+          coordinates: [coordRes[0].lon, coordRes[0].lat],
+        };
+      }
+    } catch (_) {}
+    return enriched;
   }
 
   async update(id: string, userId: string, isAdminOrModerator: boolean, updateDto: UpdateRescueRequestDto) {

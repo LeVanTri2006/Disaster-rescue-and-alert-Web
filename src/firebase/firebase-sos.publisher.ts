@@ -76,6 +76,9 @@ export class FirebaseSosPublisher implements SosRealtimePublisher {
       );
       this.database = getDatabase(this.app);
       this.auth = getAuth(this.app);
+      try {
+        this.database.goOnline();
+      } catch {}
       this.logger.log(`Firebase RTDB publisher enabled for ${serviceAccount.project_id ?? 'configured project'}`);
     } catch (error) {
       this.logger.error('Firebase RTDB publisher disabled: invalid Firebase server configuration', error);
@@ -94,9 +97,10 @@ export class FirebaseSosPublisher implements SosRealtimePublisher {
 
     const updates = buildSosRealtimeUpdates(ownerId, projection);
     this.logger.log(`FIREBASE_REALTIME_PUBLISH_START: eventId=${projection.eventId}, status=${projection.status}, path=sos-events/${projection.eventId}`);
-    const timeoutPromise = new Promise<void>((_, reject) => 
-      setTimeout(() => reject(new Error('Firebase RTDB publish request timed out after 5000ms')), 5000)
-    );
+    let timeoutTimer: NodeJS.Timeout | null = null;
+    const timeoutPromise = new Promise<void>((_, reject) => {
+      timeoutTimer = setTimeout(() => reject(new Error('Firebase RTDB publish request timed out after 15000ms')), 15000);
+    });
     
     try {
       await Promise.race([
@@ -106,6 +110,10 @@ export class FirebaseSosPublisher implements SosRealtimePublisher {
       this.logger.log(`FIREBASE_REALTIME_PUBLISH_SUCCESS: eventId=${projection.eventId}`);
     } catch (error) {
       this.logger.error(`FIREBASE_REALTIME_PUBLISH_FAILED: eventId=${projection.eventId}, error=${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+      }
     }
   }
 
