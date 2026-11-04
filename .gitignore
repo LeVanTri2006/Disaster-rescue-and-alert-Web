@@ -38,3 +38,13 @@ lerna-debug.log*
 .env.test
 .env.production
 firebase.json
+
+# OSM Importer - large source datasets (keep locally, do not commit)
+/tools/osm-importer/input/source/
+
+# OSM Importer - generated graph artifacts
+/tools/osm-importer/output/
+/tools/osm-importer/output-*/
+
+# OSM Importer - generated test coverage
+/tools/osm-importer/coverage/

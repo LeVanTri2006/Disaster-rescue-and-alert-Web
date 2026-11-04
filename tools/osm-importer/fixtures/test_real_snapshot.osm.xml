@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="Overpass API">
+  <note>The data included in this document is from www.openstreetmap.org</note>
+  <meta osm_base="2026-11-04T12:34:56Z"/>
+  <node id="1001" lat="16.0500" lon="108.2000"/>
+  <node id="1002" lat="16.0510" lon="108.2010"/>
+  <node id="1003" lat="16.0520" lon="108.2020"/>
+  <way id="2001">
+    <nd ref="1001"/>
+    <nd ref="1002"/>
+    <tag k="highway" v="primary"/>
+    <tag k="name" v="Đường Bạch Đằng Test"/>
+    <tag k="maxheight:physical" v="3.5m"/>
+    <tag k="maxwidth:physical" v="2.8m"/>
+  </way>
+  <way id="2002">
+    <nd ref="1002"/>
+    <nd ref="1003"/>
+    <tag k="highway" v="secondary"/>
+    <tag k="name" v="Đường Trần Phú Test"/>
+  </way>
+</osm>
