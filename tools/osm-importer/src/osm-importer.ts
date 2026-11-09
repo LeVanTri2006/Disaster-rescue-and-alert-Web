@@ -8,6 +8,7 @@ import {
   EdgeTransition,
   GeoPoint,
   ImportDiagnostics,
+  RawWay,
   RoadEdge,
   RoadNode,
   StrictRoutingReadiness,
@@ -24,6 +25,7 @@ import {
   parseTurnRestrictionRelation,
   RawOsmRelation,
 } from './turn-restriction-parser';
+import { resolveViaWayEdgeSequence } from './via-way-resolver';
 
 export interface ImportOptions {
   mode?: CliMode;
@@ -88,12 +90,6 @@ interface RawNode {
   id: number;
   lat: number;
   lon: number;
-}
-
-interface RawWay {
-  id: number;
-  nodeRefs: number[];
-  tags: Record<string, string>;
 }
 
 export class OsmImporter {
@@ -557,14 +553,31 @@ export class OsmImporter {
           continue;
         }
 
-        // Validate via-way restrictions
+        // Validate & compile via-way restrictions
         if (parsed.viaOsmWayIds.length > 0) {
+          const viaResult = resolveViaWayEdgeSequence(parsed, rawWaysMap, roadEdges);
+          parsed.viaWayCompilationStatus = viaResult.status;
+          parsed.orderedDirectedEdgeIds = viaResult.orderedDirectedEdgeIds ?? [];
+          parsed.viaWayCompilationError = viaResult.error ?? null;
+
+          // CRITICAL FAIL-CLOSED REQUIREMENT:
+          // Even if compiled successfully, via-way restrictions MUST REMAIN FAIL_CLOSED_UNRESOLVED
+          // until Android runtime (DFA / UCS) is implemented and verified in subsequent tasks.
           parsed.supportStatus = 'FAIL_CLOSED_UNRESOLVED';
-          parsed.validationError = 'Via-way restrictions require multi-hop state machine not yet implemented';
+          parsed.validationError =
+            viaResult.status === 'COMPILED'
+              ? 'Via-way restrictions require multi-hop state machine not yet implemented in Android runtime'
+              : (viaResult.error ?? 'Via-way restriction unresolved');
+
           turnRestrictions.push(parsed);
           diagnostics.unsupportedRestrictionsCount++;
           continue;
         }
+
+        // Via-node restriction: mark viaWayCompilationStatus as NOT_APPLICABLE
+        parsed.viaWayCompilationStatus = 'NOT_APPLICABLE';
+        parsed.orderedDirectedEdgeIds = [];
+        parsed.viaWayCompilationError = null;
 
         // Validate via-node restrictions
         const viaNodeId = parsed.viaOsmNodeIds[0];

@@ -129,6 +129,17 @@ export type RestrictionSupportStatus =
   | 'UNVERIFIED_WARNING'
   | 'EXEMPT_FOR_PROFILE';
 
+export type ViaWayCompilationStatus =
+  | 'COMPILED'
+  | 'UNRESOLVED'
+  | 'NOT_APPLICABLE';
+
+export interface RawWay {
+  id: number;
+  nodeRefs: number[];
+  tags: Record<string, string>;
+}
+
 export interface EdgeTransition {
   fromEdgeId: string;
   toEdgeId: string;
@@ -151,6 +162,11 @@ export interface TurnRestriction {
   validationError?: string | null;
   prohibitedTransitions?: EdgeTransition[];
   allowedTransitions?: EdgeTransition[];
+
+  // Task 2A via-way compilation fields:
+  viaWayCompilationStatus?: ViaWayCompilationStatus;
+  orderedDirectedEdgeIds?: string[];
+  viaWayCompilationError?: string | null;
 }
 
 export type StrictRoutingReadiness =

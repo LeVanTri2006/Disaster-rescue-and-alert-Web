@@ -1,0 +1,40 @@
+[
+  {
+    "edge": {
+      "fromNodeId": "N1",
+      "toNodeId": "N2",
+      "isWayForward": true,
+      "geometry": [
+        {
+          "lat": 16.065,
+          "lon": 108.215
+        },
+        {
+          "lat": 16.066,
+          "lon": 108.216
+        }
+      ]
+    },
+    "canonical": "edge-geometry-v2-decimal-half-even|EDGE:2:N1->2:N2|FWD:true|GEO:16.0650000,108.2150000;16.0660000,108.2160000",
+    "sha256": "8f19eaa5fc2d11584bdb48be8bd3b38da80aba6805d6a6610c7da43298eea357"
+  },
+  {
+    "edge": {
+      "fromNodeId": "N2",
+      "toNodeId": "N1",
+      "isWayForward": false,
+      "geometry": [
+        {
+          "lat": 16.066,
+          "lon": 108.216
+        },
+        {
+          "lat": 16.065,
+          "lon": 108.215
+        }
+      ]
+    },
+    "canonical": "edge-geometry-v2-decimal-half-even|EDGE:2:N2->2:N1|FWD:false|GEO:16.0660000,108.2160000;16.0650000,108.2150000",
+    "sha256": "9730833f82e5f86abb5766169c8a7e19db99e7a83781643efd88b580e7c75488"
+  }
+]

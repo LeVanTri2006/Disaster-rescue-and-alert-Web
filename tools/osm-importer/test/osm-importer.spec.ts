@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import * as zlib from 'zlib';
 import * as crypto from 'crypto';
@@ -27,6 +28,41 @@ import {
 import { runCli, parseCliArgs } from '../cli';
 
 describe('OsmImporter Prototype with Test Fixtures', () => {
+  // Every test owns its output. Read-back tests generate their own fixture and
+  // never rely on another test's order or any pre-existing graph artifact.
+  let testOutputRoot: string;
+  let fixtureOutputPath: string;
+  const protectedRoot = path.join(__dirname, '..');
+  const protectedSnapshot = () => {
+    const snapshot: Record<string, { sha256: string; mtimeMs: number }> = {};
+    for (const name of fs.readdirSync(protectedRoot).filter(n => n.startsWith('output'))) {
+      const dir = path.join(protectedRoot, name);
+      if (!fs.statSync(dir).isDirectory()) continue;
+      for (const file of fs.readdirSync(dir)) {
+        const full = path.join(dir, file);
+        if (fs.statSync(full).isFile()) snapshot[full] = {
+          sha256: crypto.createHash('sha256').update(fs.readFileSync(full)).digest('hex'),
+          mtimeMs: fs.statSync(full).mtimeMs,
+        };
+      }
+    }
+    return snapshot;
+  };
+  const protectedBefore = protectedSnapshot();
+  beforeEach(() => {
+    testOutputRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'osm-importer-test-'));
+    fixtureOutputPath = path.join(testOutputRoot, 'fixture');
+  });
+  afterEach(() => {
+    // This path was created by this test; shared repository paths are never removed.
+    fs.rmSync(testOutputRoot, { recursive: true, force: true });
+  });
+  afterAll(() => { expect(protectedSnapshot()).toEqual(protectedBefore); });
+  const fixtureOutput = () => {
+    if (!fs.existsSync(path.join(fixtureOutputPath, 'RoutingManifest.json'))) runCli({ outputDir: fixtureOutputPath });
+    return fixtureOutputPath;
+  };
+
   let importer: OsmImporter;
   let fixtureXml: string;
 
@@ -636,8 +672,8 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
   });
 
   it('22. CLI execution, RoutingManifest & Hazard Snapshot contract verification', () => {
-    const { realSha256 } = runCli();
-    const outputDir = path.join(__dirname, '..', 'output');
+    const { realSha256 } = runCli({ outputDir: fixtureOutputPath });
+    const outputDir = fixtureOutput();
 
     // Read generated RoutingManifest.json
     const manifestPath = path.join(outputDir, 'RoutingManifest.json');
@@ -666,7 +702,7 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
   });
 
   it('23. Output Gzip decompression and checksum integrity check', () => {
-    const outputDir = path.join(__dirname, '..', 'output');
+    const outputDir = fixtureOutput();
     const gzPath = path.join(outputDir, 'BaseRoadGraph.json.gz');
     const jsonPath = path.join(outputDir, 'BaseRoadGraph.json');
 
@@ -1295,7 +1331,7 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
     }
 
     // 5. CLI produces manifest conforming to contract 2.1.0
-    const outDir = path.join(__dirname, '..', 'output');
+    const outDir = fixtureOutput();
     const manifestPath = path.join(outDir, 'RoutingManifest.json');
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
 
@@ -1449,7 +1485,7 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
   });
 
   it('46. Regression 7: RoutingManifest reflects the exact same accounting and readiness metrics as BaseRoadGraph', () => {
-    const outDir = path.join(__dirname, '..', 'output');
+    const outDir = fixtureOutput();
     const manifestPath = path.join(outDir, 'RoutingManifest.json');
     const graphJsonPath = path.join(outDir, 'BaseRoadGraph.json');
 
@@ -1734,7 +1770,7 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
   });
 
   it('55. Section E.10: Manifest reflects exact states of BaseRoadGraph including canAttemptStrictRouting and detailed edge safety summary', () => {
-    const outDir = path.join(__dirname, '..', 'output');
+    const outDir = fixtureOutput();
     const manifestPath = path.join(outDir, 'RoutingManifest.json');
     const graphJsonPath = path.join(outDir, 'BaseRoadGraph.json');
 
@@ -1957,8 +1993,8 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
 
   // --- Phase 2B.2.1: Add Real OSM Snapshot Mode to Importer CLI ---
 
-  it('62. Phase 2B.2.1: Calling runCli() without args defaults to FIXTURE mode with fixture outputs and manifest', () => {
-    const { manifest, result } = runCli();
+  it('62. Phase 2B.2.1: Default CLI mode is FIXTURE with an isolated output override', () => {
+    const { manifest, result } = runCli({ outputDir: fixtureOutputPath });
     expect(manifest.boundingBoxType).toBe('FIXTURE');
     expect(manifest.fixtureGeneratedAt).toBe('2026-11-03T16:45:00.000Z');
     expect(manifest.osmSnapshotTimestamp).toBe('2024-11-01T00:00:00.000Z');
@@ -1969,7 +2005,7 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
 
   it('63. Phase 2B.2.1: REAL_OSM_SNAPSHOT mode uses DA_NANG_CENTRAL_PRODUCTION_BOUNDING_BOX', () => {
     const realFixturePath = path.join(__dirname, '..', 'fixtures', 'test_real_snapshot.osm.xml');
-    const realOutputDir = path.join(__dirname, '..', 'output-real');
+    const realOutputDir = path.join(testOutputRoot, 'real');
     const { manifest, result } = runCli({
       mode: 'REAL_OSM_SNAPSHOT',
       inputPath: realFixturePath,
@@ -1990,7 +2026,7 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
 
   it('64. Phase 2B.2.1: REAL_OSM_SNAPSHOT mode omits fixtureGeneratedAt completely from Graph and Manifest', () => {
     const realFixturePath = path.join(__dirname, '..', 'fixtures', 'test_real_snapshot.osm.xml');
-    const realOutputDir = path.join(__dirname, '..', 'output-real');
+    const realOutputDir = path.join(testOutputRoot, 'real');
     const { manifest, result } = runCli({
       mode: 'REAL_OSM_SNAPSHOT',
       inputPath: realFixturePath,
@@ -2077,7 +2113,7 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
 
   it('68. Phase 2B.2.1: RoutingManifest records boundingBoxType PRODUCTION and targetProductionBoundingBox', () => {
     const realFixturePath = path.join(__dirname, '..', 'fixtures', 'test_real_snapshot.osm.xml');
-    const realOutputDir = path.join(__dirname, '..', 'output-real');
+    const realOutputDir = path.join(testOutputRoot, 'real');
     const { manifest } = runCli({
       mode: 'REAL_OSM_SNAPSHOT',
       inputPath: realFixturePath,
@@ -2091,12 +2127,12 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
   });
 
   it('69. Phase 2B.2.1: REAL_OSM_SNAPSHOT output does not overwrite FIXTURE output directory', () => {
-    const fixtureOutputDir = path.join(__dirname, '..', 'output');
-    const realOutputDir = path.join(__dirname, '..', 'output-real');
+    const fixtureOutputDir = fixtureOutput();
+    const realOutputDir = path.join(testOutputRoot, 'real');
     const realFixturePath = path.join(__dirname, '..', 'fixtures', 'test_real_snapshot.osm.xml');
 
     // 1. Run FIXTURE
-    runCli();
+    runCli({ outputDir: fixtureOutputPath });
     expect(fs.existsSync(path.join(fixtureOutputDir, 'RoutingManifest.json'))).toBe(true);
     const fixtureManifest = JSON.parse(fs.readFileSync(path.join(fixtureOutputDir, 'RoutingManifest.json'), 'utf-8'));
     expect(fixtureManifest.boundingBoxType).toBe('FIXTURE');
@@ -2121,15 +2157,13 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
 
   it('70. Phase 2B.2.1: Backward compatibility of runCli with custom string paths and CLI argument parsing', () => {
     const fixturePath = path.join(__dirname, '..', 'fixtures', 'test_fixture.osm.xml');
-    const customOut = path.join(__dirname, '..', 'output-custom-test');
+    const customOut = path.join(testOutputRoot, 'custom');
 
     // String argument legacy signature
     const { manifest } = runCli(fixturePath, customOut);
     expect(manifest.boundingBoxType).toBe('FIXTURE');
     expect(fs.existsSync(path.join(customOut, 'BaseRoadGraph.json'))).toBe(true);
 
-    // Clean up temporary test output dir
-    fs.rmSync(customOut, { recursive: true, force: true });
 
     // parseCliArgs tests
     const args1 = parseCliArgs(['--mode=real', '--input=input.xml', '--output=out-dir']);
@@ -2147,12 +2181,12 @@ describe('OsmImporter Prototype with Test Fixtures', () => {
     expect(() => parseCliArgs(['--mode=unknown_mode'])).toThrow('Invalid CLI mode: "unknown_mode"');
 
     // Missing input file error
-    expect(() => runCli({ mode: 'REAL_OSM_SNAPSHOT', inputPath: 'non_existent_file.xml' })).toThrow('Input file not found');
+    expect(() => runCli({ mode: 'REAL_OSM_SNAPSHOT', inputPath: 'non_existent_file.xml', outputDir: path.join(testOutputRoot, 'missing-input') })).toThrow('Input file not found');
   });
 
   it('71. Phase 2B.2.1: Graph version and snapshot timestamp are recorded consistently between Graph and Manifest', () => {
     const realFixturePath = path.join(__dirname, '..', 'fixtures', 'test_real_snapshot.osm.xml');
-    const realOutputDir = path.join(__dirname, '..', 'output-real');
+    const realOutputDir = path.join(testOutputRoot, 'real');
     const { manifest, result } = runCli({
       mode: 'REAL_OSM_SNAPSHOT',
       inputPath: realFixturePath,

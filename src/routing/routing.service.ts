@@ -15,6 +15,14 @@ const EXPECTED_BUNDLE_FILE_NAME = 'BaseRoadGraph.json.gz';
 const SHA256_REGEX = /^[a-f0-9]{64}$/;
 const GRAPH_VERSION_REGEX = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 
+// One immutable decision for every response field until authoritative verification exists.
+const DOWNLOAD_ONLY_READINESS = Object.freeze({
+  strictRoutingReady: false,
+  liveHazardReady: false,
+  canAttemptStrictRouting: false,
+  overallStrictRoutingReadiness: 'NOT_READY_NO_VERIFIED_EDGES',
+} as const);
+
 const VALID_READINESS_STATES: ReadonlySet<StrictRoutingReadiness> = new Set([
   'READY',
   'NOT_READY_UNRESOLVED_RESTRICTIONS',
@@ -32,12 +40,13 @@ export class RoutingService {
    * Retrieves the current validated routing manifest and generates a presigned download URL.
    * Differentiates three explicit lifecycle states:
    * 1. downloadAvailable: true when manifest is valid and download URL generated.
-   * 2. strictRoutingReady: true only when manifest confirms all strict routing conditions.
-   * 3. liveHazardReady: true only when a valid hazard snapshot is attached.
+   * 2. Strict routing stays unavailable: no production-authoritative verifier is integrated.
+   * 3. Attached hazard metadata alone cannot establish live hazard readiness.
    */
   async getCurrentRouting(): Promise<RoutingStatusResponse> {
     const rawManifest = await this.storageService.getCurrentManifest();
-    const manifest = this.validateManifest(rawManifest);
+    const validatedManifest = this.validateManifest(rawManifest);
+    const manifest = this.downloadOnlyManifest(validatedManifest);
 
     const download = await this.storageService.createGraphDownloadUrl(
       manifest.graphVersion,
@@ -46,30 +55,91 @@ export class RoutingService {
 
     const downloadAvailable = true;
 
-    const strictRoutingReady =
-      manifest.overallStrictRoutingReadiness === 'READY' &&
-      manifest.restrictionStrictRoutingReadiness === 'READY' &&
-      manifest.isRestrictionStrictRoutingEligible === true &&
-      manifest.unsupportedRestrictionsSummary.totalCount === 0 &&
-      manifest.canAttemptStrictRouting === true &&
-      manifest.edgeSafetySummary.unverifiedEdges === 0 &&
-      manifest.edgeSafetySummary.verifiedCompatibleEdges > 0 &&
-      manifest.edgeSafetySummary.totalEdges > 0;
-
-    const liveHazardReady =
-      manifest.hazardSnapshotStatus === 'ATTACHED' &&
-      typeof manifest.activeHazardSnapshotVersion === 'string' &&
-      manifest.activeHazardSnapshotVersion.trim().length > 0;
-
     return {
       manifest,
       download,
       downloadAvailable,
-      strictRoutingReady,
-      liveHazardReady,
-      canAttemptStrictRouting: manifest.canAttemptStrictRouting,
-      overallStrictRoutingReadiness: manifest.overallStrictRoutingReadiness,
+      ...DOWNLOAD_ONLY_READINESS,
     };
+  }
+
+  /** A response view only; never rewrite the stored manifest or graph bytes. */
+  private downloadOnlyManifest(m: RoutingManifest): RoutingManifest {
+    // These are unverified claims, even if internally consistent or hash-matched.
+    // There is deliberately no flag, environment setting or TEST_ONLY receipt override.
+    if (
+      m.canAttemptStrictRouting !== false ||
+      (m.isStrictRoutingEligible !== undefined &&
+        m.isStrictRoutingEligible !== false) ||
+      m.overallStrictRoutingReadiness === 'READY' ||
+      (m.strictRoutingReadiness !== undefined &&
+        (!VALID_READINESS_STATES.has(m.strictRoutingReadiness) ||
+          m.strictRoutingReadiness === 'READY')) ||
+      m.edgeSafetySummary.verifiedCompatibleEdges > 0 ||
+      m.edgeSafetySummary.strictSafeEdgesPercent > 0
+    ) {
+      throw new InternalServerErrorException(
+        'Production strict routing verification is unavailable; manifest readiness claims cannot be accepted',
+      );
+    }
+
+    // Enumerate the response contract, rather than forwarding unknown approval/provider claims.
+    // Clone nested metadata as well so neither the response nor its caller can mutate storage.
+    const box = (value: RoutingManifest['boundingBox']) =>
+      value && {
+        minLon: value.minLon,
+        minLat: value.minLat,
+        maxLon: value.maxLon,
+        maxLat: value.maxLat,
+        bufferedMeters: value.bufferedMeters,
+      };
+    return structuredClone({
+      $schema: m.$schema,
+      manifestVersion: m.manifestVersion,
+      generatedAt: m.generatedAt,
+      graphVersion: m.graphVersion,
+      osmSnapshotTimestamp: m.osmSnapshotTimestamp,
+      fixtureGeneratedAt: m.fixtureGeneratedAt,
+      importerVersion: m.importerVersion,
+      vehicleProfile: m.vehicleProfile,
+      boundingBoxType: m.boundingBoxType,
+      boundingBox: box(m.boundingBox),
+      targetProductionBoundingBox: box(m.targetProductionBoundingBox),
+      bundle: {
+        fileName: m.bundle.fileName,
+        compressedSizeBytes: m.bundle.compressedSizeBytes,
+        uncompressedSizeBytes: m.bundle.uncompressedSizeBytes,
+        sha256: m.bundle.sha256,
+      },
+      activeHazardSnapshotVersion: m.activeHazardSnapshotVersion,
+      hazardSnapshotStatus: m.hazardSnapshotStatus,
+      hazardAssessmentPolicy: m.hazardAssessmentPolicy,
+      isRestrictionStrictRoutingEligible:
+        DOWNLOAD_ONLY_READINESS.canAttemptStrictRouting,
+      restrictionStrictRoutingReadiness:
+        DOWNLOAD_ONLY_READINESS.overallStrictRoutingReadiness,
+      unsupportedRestrictionsSummary: {
+        totalCount: m.unsupportedRestrictionsSummary.totalCount,
+        enforcementPolicy: m.unsupportedRestrictionsSummary.enforcementPolicy,
+      },
+      canAttemptStrictRouting: DOWNLOAD_ONLY_READINESS.canAttemptStrictRouting,
+      isStrictRoutingEligible: DOWNLOAD_ONLY_READINESS.canAttemptStrictRouting,
+      overallStrictRoutingReadiness:
+        DOWNLOAD_ONLY_READINESS.overallStrictRoutingReadiness,
+      strictRoutingReadiness:
+        DOWNLOAD_ONLY_READINESS.overallStrictRoutingReadiness,
+      edgeSafetySummary: {
+        totalEdges: m.edgeSafetySummary.totalEdges,
+        verifiedCompatibleEdges: m.edgeSafetySummary.verifiedCompatibleEdges,
+        unverifiedEdges: m.edgeSafetySummary.unverifiedEdges,
+        blockedEdges: m.edgeSafetySummary.blockedEdges,
+        conflictedEdges: m.edgeSafetySummary.conflictedEdges,
+        strictSafeEdgesPercent: m.edgeSafetySummary.strictSafeEdgesPercent,
+        blockedWays: m.edgeSafetySummary.blockedWays,
+        excludedBlockedWays: m.edgeSafetySummary.excludedBlockedWays,
+        retainedBlockedWays: m.edgeSafetySummary.retainedBlockedWays,
+      },
+    });
   }
 
   /**
@@ -151,10 +221,7 @@ export class RoutingService {
     }
 
     // 5. Bounding box type
-    if (
-      m.boundingBoxType !== 'FIXTURE' &&
-      m.boundingBoxType !== 'PRODUCTION'
-    ) {
+    if (m.boundingBoxType !== 'FIXTURE' && m.boundingBoxType !== 'PRODUCTION') {
       throw new InternalServerErrorException(
         'Invalid or missing boundingBoxType in routing manifest',
       );
@@ -287,9 +354,7 @@ export class RoutingService {
       );
     }
 
-    if (
-      restrictionSummary.enforcementPolicy !== 'FAIL_CLOSED_IN_STRICT_MODE'
-    ) {
+    if (restrictionSummary.enforcementPolicy !== 'FAIL_CLOSED_IN_STRICT_MODE') {
       throw new InternalServerErrorException(
         'Invalid unsupportedRestrictionsSummary.enforcementPolicy in routing manifest',
       );

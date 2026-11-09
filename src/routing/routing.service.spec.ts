@@ -110,7 +110,7 @@ describe('RoutingService', () => {
     expect(result.liveHazardReady).toBe(false);
     expect(result.canAttemptStrictRouting).toBe(false);
     expect(result.overallStrictRoutingReadiness).toBe(
-      'NOT_READY_UNRESOLVED_RESTRICTIONS',
+      'NOT_READY_NO_VERIFIED_EDGES',
     );
   });
 
@@ -248,7 +248,7 @@ describe('RoutingService', () => {
     );
   });
 
-  it('6. should allow download but mark strictRoutingReady=false when graph has unsupported restrictions', async () => {
+  it('6. rejects claimed strict permission even when restrictions also forbid it', async () => {
     const manifestWithUnsupportedRestrictions = createValidManifest({
       isRestrictionStrictRoutingEligible: false,
       restrictionStrictRoutingReadiness: 'NOT_READY_UNRESOLVED_RESTRICTIONS',
@@ -277,12 +277,13 @@ describe('RoutingService', () => {
       expiresIn: 900,
     });
 
-    const result = await service.getCurrentRouting();
-    expect(result.downloadAvailable).toBe(true);
-    expect(result.strictRoutingReady).toBe(false);
+    await expect(service.getCurrentRouting()).rejects.toThrow(
+      'Production strict routing verification is unavailable',
+    );
+    expect(storageService.createGraphDownloadUrl).not.toHaveBeenCalled();
   });
 
-  it('7. should allow download but mark strictRoutingReady=false when graph has unverified compatibility edges', async () => {
+  it('7. rejects claimed permission when summary still contains unverified edges', async () => {
     const manifestWithUnverifiedEdges = createValidManifest({
       isRestrictionStrictRoutingEligible: true,
       restrictionStrictRoutingReadiness: 'READY',
@@ -311,12 +312,13 @@ describe('RoutingService', () => {
       expiresIn: 900,
     });
 
-    const result = await service.getCurrentRouting();
-    expect(result.downloadAvailable).toBe(true);
-    expect(result.strictRoutingReady).toBe(false);
+    await expect(service.getCurrentRouting()).rejects.toThrow(
+      'Production strict routing verification is unavailable',
+    );
+    expect(storageService.createGraphDownloadUrl).not.toHaveBeenCalled();
   });
 
-  it('8. should mark both downloadAvailable=true and strictRoutingReady=true when graph meets all strict routing conditions', async () => {
+  it('8. rejects internally consistent READY claims without production authority', async () => {
     const fullyReadyManifest = createValidManifest({
       isRestrictionStrictRoutingEligible: true,
       restrictionStrictRoutingReadiness: 'READY',
@@ -345,11 +347,10 @@ describe('RoutingService', () => {
       expiresIn: 900,
     });
 
-    const result = await service.getCurrentRouting();
-    expect(result.downloadAvailable).toBe(true);
-    expect(result.strictRoutingReady).toBe(true);
-    expect(result.canAttemptStrictRouting).toBe(true);
-    expect(result.overallStrictRoutingReadiness).toBe('READY');
+    await expect(service.getCurrentRouting()).rejects.toThrow(
+      'Production strict routing verification is unavailable',
+    );
+    expect(storageService.createGraphDownloadUrl).not.toHaveBeenCalled();
   });
 
   it('9. should mark liveHazardReady=false when hazard snapshot is not included', async () => {
@@ -368,7 +369,7 @@ describe('RoutingService', () => {
     expect(result.liveHazardReady).toBe(false);
   });
 
-  it('10. should mark liveHazardReady=true when a valid hazard snapshot is attached', async () => {
+  it('10. keeps liveHazardReady=false for attached but unauthenticated hazard metadata', async () => {
     const withHazardManifest = createValidManifest({
       hazardSnapshotStatus: 'ATTACHED',
       activeHazardSnapshotVersion: 'hz_danang_20261104_120000',
@@ -381,7 +382,7 @@ describe('RoutingService', () => {
     });
 
     const result = await service.getCurrentRouting();
-    expect(result.liveHazardReady).toBe(true);
+    expect(result.liveHazardReady).toBe(false);
     expect(result.manifest.activeHazardSnapshotVersion).toBe(
       'hz_danang_20261104_120000',
     );
@@ -450,5 +451,38 @@ describe('RoutingService', () => {
     const res2 = await service.getRoutingStatus();
 
     expect(res1).toEqual(res2);
+  });
+
+  it('does not mutate a frozen stored manifest or share nested response metadata', async () => {
+    const stored = createValidManifest({
+      isRestrictionStrictRoutingEligible: true,
+      restrictionStrictRoutingReadiness: 'READY',
+    });
+    const before = structuredClone(stored);
+    Object.freeze(stored.bundle);
+    Object.freeze(stored.edgeSafetySummary);
+    Object.freeze(stored);
+    storageService.getCurrentManifest.mockResolvedValue(stored);
+    storageService.createGraphDownloadUrl.mockResolvedValue({
+      url: 'https://r2.test/download.gz',
+      expiresIn: 900,
+    });
+    const result = await service.getCurrentRouting();
+    expect(stored).toEqual(before);
+    expect(result.manifest).not.toBe(stored);
+    expect(result.manifest.bundle).not.toBe(stored.bundle);
+    expect(result.manifest.edgeSafetySummary).not.toBe(
+      stored.edgeSafetySummary,
+    );
+    expect(result.manifest.isRestrictionStrictRoutingEligible).toBe(false);
+    expect(result.manifest.restrictionStrictRoutingReadiness).toBe(
+      'NOT_READY_NO_VERIFIED_EDGES',
+    );
+    result.manifest.bundle.sha256 = '0'.repeat(64);
+    result.manifest.edgeSafetySummary.unverifiedEdges = 0;
+    expect(stored).toEqual(before);
+    expect((await service.getRoutingStatus()).manifest.bundle.sha256).toBe(
+      before.bundle.sha256,
+    );
   });
 });
