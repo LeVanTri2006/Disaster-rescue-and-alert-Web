@@ -13,6 +13,7 @@ import { SosModule } from './sos/sos.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AdminModule } from './admin/admin.module';
 import { MailModule } from './mail/mail.module';
+import { RoutingModule } from './routing/routing.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { MailModule } from './mail/mail.module';
     FirebaseModule,
     AdminModule,
     MailModule,
+    RoutingModule,
   ],
 })
 export class AppModule {}
